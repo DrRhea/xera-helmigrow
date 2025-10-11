@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import SplashScreen from './components/SplashScreen';
+import WelcomeScreen from './components/WelcomeScreen';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -10,14 +11,21 @@ export default function App() {
     setIsLoading(false);
   };
 
+  const handleSignUp = () => {
+    Alert.alert('Sign Up', 'Sign Up functionality will be implemented soon!');
+  };
+
+  const handleSignIn = () => {
+    Alert.alert('Sign In', 'Sign In functionality will be implemented soon!');
+  };
+
   if (isLoading) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Selamat Datang di HelmiGrowth!</Text>
-      <Text style={styles.subText}>Aplikasi untuk pertumbuhan dan perkembangan</Text>
+      <WelcomeScreen onSignUp={handleSignUp} onSignIn={handleSignIn} />
       <StatusBar style="auto" />
     </View>
   );
@@ -27,21 +35,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    fontStyle: 'italic',
   },
 });
