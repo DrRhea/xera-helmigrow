@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -52,7 +53,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
         resizeMode="cover"
       />
 
-      <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Ionicons name="arrow-back" size={24} color="#000000" />
@@ -129,7 +135,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
         </LinearGradient>
       </TouchableOpacity>
 
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -149,12 +155,17 @@ const styles = StyleSheet.create({
     zIndex: 0,
     opacity: 0.3,
   },
-  container: {
+  scrollContainer: {
     flex: 1,
+    zIndex: 1,
+  },
+  container: {
+    flexGrow: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     paddingHorizontal: 30,
     paddingTop: 60,
-    zIndex: 1,
+    paddingBottom: 40,
+    minHeight: height,
   },
   backButton: {
     position: 'absolute',
