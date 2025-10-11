@@ -8,6 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 
 const { width } = Dimensions.get('window');
 
@@ -17,24 +18,27 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSignUp, onSignIn }) => {
+  let [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../logo.png')}
+          source={require('../assets/logo-helmigrowth.png')}
           style={styles.logo}
           resizeMode="contain"
         />
       </View>
 
-      {/* App Name */}
-      <View style={styles.appNameContainer}>
-        <Text style={styles.appName}>
-          <Text style={styles.helmiText}>Helmi</Text>
-          <Text style={styles.growthText}>Growth</Text>
-        </Text>
-      </View>
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
@@ -77,25 +81,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   logoContainer: {
-    marginBottom: 30,
+    marginBottom: 80,
   },
   logo: {
     width: width * 0.3,
     height: width * 0.3,
-  },
-  appNameContainer: {
-    marginBottom: 80,
-  },
-  appName: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  helmiText: {
-    color: '#FF6B9D',
-  },
-  growthText: {
-    color: '#87CEEB',
   },
   buttonContainer: {
     width: '100%',
@@ -117,7 +107,7 @@ const styles = StyleSheet.create({
   signUpText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins_600SemiBold',
   },
   signInButton: {
     width: '100%',
@@ -139,7 +129,7 @@ const styles = StyleSheet.create({
   signInText: {
     color: '#FF6B9D',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins_600SemiBold',
   },
 });
 

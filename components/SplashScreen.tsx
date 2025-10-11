@@ -72,7 +72,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         ]}
       >
         <Image
-          source={require('../logo.png')}
+          source={require('../assets/logo-helmigrowth.png')}
           style={styles.logo}
           resizeMode="contain"
         />
