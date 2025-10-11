@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     marginBottom: 80,
   },
   logo: {
-    width: width * 0.3,
-    height: width * 0.3,
+    width: width * 0.25,
+    height: width * 0.25,
   },
   buttonContainer: {
     width: '100%',
