@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,10 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import AddChildScreen from './AddChildScreen';
+import ImunisasiScreen from './ImunisasiScreen';
+import ResepMpasiScreen from './ResepMpasiScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,8 +23,13 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
+  const [showAddChild, setShowAddChild] = useState(false);
+  const [showImunisasi, setShowImunisasi] = useState(false);
+  const [showResepMpasi, setShowResepMpasi] = useState(false);
+
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
+    Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
   });
@@ -30,14 +38,68 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     return null;
   }
 
+  const handleAddChild = () => {
+    setShowAddChild(true);
+  };
+
+  const handleBackFromAddChild = () => {
+    setShowAddChild(false);
+  };
+
+  const handleSaveChild = () => {
+    setShowAddChild(false);
+    // Here you can add logic to save the child data
+  };
+
+  const handleImunisasi = () => {
+    setShowImunisasi(true);
+  };
+
+  const handleBackFromImunisasi = () => {
+    setShowImunisasi(false);
+  };
+
+  const handleResepMpasi = () => {
+    setShowResepMpasi(true);
+  };
+
+  const handleBackFromResepMpasi = () => {
+    setShowResepMpasi(false);
+  };
+
+  if (showAddChild) {
+    return (
+      <AddChildScreen 
+        onBack={handleBackFromAddChild}
+        onSave={handleSaveChild}
+      />
+    );
+  }
+
+  if (showImunisasi) {
+    return (
+      <ImunisasiScreen 
+        onBack={handleBackFromImunisasi}
+      />
+    );
+  }
+
+  if (showResepMpasi) {
+    return (
+      <ResepMpasiScreen 
+        onBack={handleBackFromResepMpasi}
+      />
+    );
+  }
+
   const featureIcons = [
-    { id: 1, icon: 'calendar-check', label: 'Jadwal Imuninasi' },
-    { id: 2, icon: 'restaurant', label: 'Resep MPASI' },
-    { id: 3, icon: 'bar-chart', label: 'Grafik Tumbuhi' },
-    { id: 4, icon: 'star', label: 'Tahap Kembang' },
-    { id: 5, icon: 'document-text', label: 'Artikel' },
-    { id: 6, icon: 'bag', label: 'Info Produk' },
-    { id: 7, icon: 'book', label: 'Diari Anak' },
+    { id: 1, icon: require('../assets/icons/jadwal-imunisasi.png'), label: 'Jadwal Imuninasi' },
+    { id: 2, icon: require('../assets/icons/resep-mpasi.png'), label: 'Resep MPASI' },
+    { id: 3, icon: require('../assets/icons/grafik-tumbuhi.png'), label: 'Grafik Tumbuhi' },
+    { id: 4, icon: require('../assets/icons/tahap-kembang.png'), label: 'Tahap Kembang' },
+    { id: 5, icon: require('../assets/icons/artikel.png'), label: 'Artikel' },
+    { id: 6, icon: require('../assets/icons/info-produk.png'), label: 'Info Produk' },
+    { id: 7, icon: require('../assets/icons/diari-anak.png'), label: 'Diari Anak' },
   ];
 
   const contentCards = [
@@ -64,9 +126,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   ];
 
   const renderFeatureIcon = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.featureIconContainer}>
+    <TouchableOpacity 
+      style={styles.featureIconContainer}
+      onPress={() => {
+        if (item.id === 1) { // Jadwal Imuninasi
+          handleImunisasi();
+        } else if (item.id === 2) { // Resep MPASI
+          handleResepMpasi();
+        }
+        // Add other navigation handlers here for other icons
+      }}
+    >
       <View style={styles.featureIcon}>
-        <Ionicons name={item.icon as any} size={24} color="#FF6B9D" />
+        <Image
+          source={item.icon}
+          style={styles.featureIconImage}
+          resizeMode="contain"
+        />
       </View>
       <Text style={styles.featureLabel}>{item.label}</Text>
     </TouchableOpacity>
@@ -92,14 +168,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Image
-              source={require('../assets/logo-helmigrowth.png')}
+              source={require('../assets/logo-helmigrowth-horizontal.png')}
               style={styles.headerLogo}
               resizeMode="contain"
             />
-            <View style={styles.appNameContainer}>
-              <Text style={styles.helmiText}>Helmi</Text>
-              <Text style={styles.growthText}>Growth</Text>
-            </View>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
             <Ionicons name="notifications" size={24} color="#000000" />
@@ -118,24 +190,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         </View>
 
         <LinearGradient
-          colors={['#FF6B9D', '#87CEEB']}
+          colors={['#3FB2E6', '#B3E8FF']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.childProfileCard}
         >
           <View style={styles.childProfileContent}>
             <View style={styles.childIcons}>
-              <View style={styles.childIcon}>
-                <Ionicons name="person" size={24} color="#FFFFFF" />
-              </View>
-              <View style={styles.childIcon}>
-                <Ionicons name="person" size={24} color="#FFFFFF" />
-              </View>
+              <Image
+                source={require('../assets/icons/ikon-bayi.png')}
+                style={styles.childIconImage}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.childProfileText}>
               <Text style={styles.childProfileTitle}>Mom Dad belum Punya Profil Anak</Text>
-              <TouchableOpacity style={styles.addChildButton}>
-                <Text style={styles.addChildText}>+ Tambahkan Anak</Text>
+              <TouchableOpacity style={styles.addChildButton} onPress={handleAddChild}>
+                <LinearGradient
+                  colors={['#F15797', '#FFFDED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.addChildGradient}
+                >
+                  <Text style={styles.addChildText}>+ Tambahkan Anak</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -160,21 +238,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 
         {/* Manjujai Banner */}
         <LinearGradient
-          colors={['#FF6B9D', '#D946EF']}
+          colors={['#F267A0', '#FEF8EB']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.manjujaiBanner}
         >
           <View style={styles.manjujaiContent}>
             <View style={styles.manjujaiImage}>
-              <Text style={styles.manjujaiEmoji}>👩‍👶</Text>
+              <Image
+                source={require('../assets/icons/manjujai.png')}
+                style={styles.manjujaiIcon}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.manjujaiText}>
               <Text style={styles.manjujaiTitle}>Manjujai</Text>
               <Text style={styles.manjujaiSubtitle}>Video & Edukasi Manjujai</Text>
             </View>
             <TouchableOpacity style={styles.manjujaiArrow}>
-              <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+              <Image
+                source={require('../assets/icons/panah-manjujai.png')}
+                style={styles.manjujaiArrowIcon}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -248,22 +334,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerLogo: {
-    width: 40,
+    width: 120,
     height: 40,
     marginRight: 10,
-  },
-  appNameContainer: {
-    flexDirection: 'row',
-  },
-  helmiText: {
-    fontSize: 18,
-    fontFamily: 'Poppins_700Bold',
-    color: '#FF6B9D',
-  },
-  growthText: {
-    fontSize: 18,
-    fontFamily: 'Poppins_700Bold',
-    color: '#87CEEB',
   },
   notificationButton: {
     position: 'relative',
@@ -302,10 +375,12 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   childProfileCard: {
-    marginHorizontal: 20,
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 30,
+    width: width * 0.9, // 90% of screen width for better responsiveness
+    minHeight: 100, // Minimum height for better content spacing
+    borderRadius: 16, // Slightly larger for modern look
+    padding: 16, // Reduced padding for better content fit
+    marginBottom: 24, // Consistent spacing
+    alignSelf: 'center',
   },
   childProfileContent: {
     flexDirection: 'row',
@@ -313,37 +388,40 @@ const styles = StyleSheet.create({
   },
   childIcons: {
     flexDirection: 'row',
-    marginRight: 15,
+    marginRight: 16, // Consistent 16px spacing
   },
-  childIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
+  childIconImage: {
+    width: 80, // More balanced size
+    height: 80, // Square for better proportions
   },
   childProfileText: {
     flex: 1,
   },
   childProfileTitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: '#FFFFFF',
-    marginBottom: 10,
+    fontSize: 13, // Smaller font size to fit better
+    fontFamily: 'Poppins_500Medium', // Medium weight for better hierarchy
+    color: '#000000',
+    marginBottom: 8, // Reduced spacing
+    lineHeight: 16, // Reduced line height
   },
   addChildButton: {
-    backgroundColor: '#FF6B9D',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    width: 145,
+    height: 18,
     borderRadius: 20,
     alignSelf: 'flex-start',
+    overflow: 'hidden',
+  },
+  addChildGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addChildText: {
-    fontSize: 12,
+    fontSize: 13, // Slightly larger for better readability
     fontFamily: 'Poppins_600SemiBold',
-    color: '#FFFFFF',
+    color: '#000000',
   },
   featureSection: {
     marginBottom: 30,
@@ -353,23 +431,28 @@ const styles = StyleSheet.create({
   },
   featureIconContainer: {
     alignItems: 'center',
-    marginRight: 20,
-    width: 80,
+    marginRight: 16, // Consistent spacing
+    width: 72, // Slightly smaller for better fit
   },
   featureIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56, // Slightly smaller for better proportions
+    height: 56,
+    borderRadius: 16, // Consistent with card border radius
     backgroundColor: '#F5F5F5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
   },
+  featureIconImage: {
+    width: 24,
+    height: 24,
+  },
   featureLabel: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
+    fontSize: 11, // Slightly smaller for better fit
+    fontFamily: 'Poppins_500Medium', // Medium weight for better readability
     color: '#000000',
     textAlign: 'center',
+    lineHeight: 14, // Better line height
   },
   carouselDots: {
     flexDirection: 'row',
@@ -399,22 +482,24 @@ const styles = StyleSheet.create({
   manjujaiImage: {
     marginRight: 15,
   },
-  manjujaiEmoji: {
-    fontSize: 40,
+  manjujaiIcon: {
+    width: 60,
+    height: 60,
   },
   manjujaiText: {
     flex: 1,
   },
   manjujaiTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Poppins_700Bold',
-    color: '#FFFFFF',
+    fontStyle: 'italic',
+    color: '#000000',
     marginBottom: 5,
   },
   manjujaiSubtitle: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: '#FFFFFF',
+    color: '#000000',
   },
   manjujaiArrow: {
     width: 30,
@@ -423,6 +508,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  manjujaiArrowIcon: {
+    width: 19.88042536643359,
+    height: 19.88042536643359,
   },
   carouselPlaceholder: {
     height: 150,
