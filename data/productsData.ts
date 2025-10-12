@@ -78,52 +78,6 @@ export const productsData: ProductData[] = [
   },
   {
     id: 3,
-    name: 'Salad Buah Vla Dadih',
-    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
-    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto salad buah
-    tag: 'Produk',
-    composition: [
-      'Buah-buahan segar',
-      'Vla dadih',
-      'Potongan jelly'
-    ],
-    nutrition: {
-      servingSize: '100 gram',
-      servingsPerPackage: '1 sajian dalam kemasan',
-      perServing: {
-        totalEnergy: '114,1 kkal',
-        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
-        totalFat: '7 gr',
-        protein: '8,4 gr',
-        carbohydrate: '23,2 gr'
-      }
-    },
-    price: 'Rp. 15000'
-  },
-  {
-    id: 4,
-    name: 'Tepung Dadih Susu Sapi',
-    shelfLife: '1 bulan',
-    image: require('../assets/info-produk/tepung-dadih-susu-sapi.png'),
-    tag: 'Produk',
-    composition: [
-      'Susu sapi difermentasikan'
-    ],
-    nutrition: {
-      servingSize: '3 gram',
-      servingsPerPackage: '1 sajian dalam kemasan',
-      perServing: {
-        totalEnergy: '9,65 kkal',
-        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
-        totalFat: '0,25 gr',
-        protein: '0,36 gr',
-        carbohydrate: '1,5 gr'
-      }
-    },
-    price: 'Rp. 5000'
-  },
-  {
-    id: 5,
     name: 'Healthy Cookies',
     shelfLife: '1 bulan - suhu ruang',
     image: require('../assets/info-produk/healthy-cookies.jpeg'),
@@ -151,10 +105,10 @@ export const productsData: ProductData[] = [
     price: 'Rp. 25000'
   },
   {
-    id: 6,
+    id: 4,
     name: 'Puding Dadih',
     shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
-    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto puding dadih
+    image: require('../assets/info-produk/puding-dadih.jpeg'),
     tag: 'Produk',
     composition: [
       'Agar',
@@ -176,10 +130,10 @@ export const productsData: ProductData[] = [
     price: 'Rp. 5000'
   },
   {
-    id: 7,
+    id: 5,
     name: 'Puding Telang',
     shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
-    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto puding telang
+    image: require('../assets/info-produk/puding-telang.jpeg'),
     tag: 'Produk',
     composition: [
       'Agar',
@@ -201,10 +155,10 @@ export const productsData: ProductData[] = [
     price: 'Rp. 5000'
   },
   {
-    id: 8,
+    id: 6,
     name: 'Crust Pie Buah',
     shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
-    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto crust pie buah
+    image: require('../assets/info-produk/crust-pie-buah.jpeg'),
     tag: 'Produk',
     composition: [
       'Tepung komposit',
@@ -222,6 +176,52 @@ export const productsData: ProductData[] = [
         totalFat: '3,89 gr',
         protein: '2,19 gr',
         carbohydrate: '12,84 gr'
+      }
+    },
+    price: 'Rp. 5000'
+  },
+  {
+    id: 7,
+    name: 'Salad Buah Vla Dadih',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/salad-buad-via-dadih.jpeg'),
+    tag: 'Produk',
+    composition: [
+      'Buah-buahan segar',
+      'Vla dadih',
+      'Potongan jelly'
+    ],
+    nutrition: {
+      servingSize: '100 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '114,1 kkal',
+        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
+        totalFat: '7 gr',
+        protein: '8,4 gr',
+        carbohydrate: '23,2 gr'
+      }
+    },
+    price: 'Rp. 15000'
+  },
+  {
+    id: 8,
+    name: 'Tepung Dadih Susu Sapi',
+    shelfLife: '1 bulan',
+    image: require('../assets/info-produk/tepung-dadih-susu-sapi.png'),
+    tag: 'Produk',
+    composition: [
+      'Susu sapi difermentasikan'
+    ],
+    nutrition: {
+      servingSize: '3 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '9,65 kkal',
+        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
+        totalFat: '0,25 gr',
+        protein: '0,36 gr',
+        carbohydrate: '1,5 gr'
       }
     },
     price: 'Rp. 5000'
