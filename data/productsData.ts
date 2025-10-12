@@ -49,5 +49,77 @@ export const productsData: ProductData[] = [
       }
     },
     price: 'Rp. 8000'
+  },
+  {
+    id: 2,
+    name: 'Vla Dadih',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/via-dadih.jpeg'),
+    tag: 'Produk',
+    composition: [
+      'Susu',
+      'Gula',
+      'Maizena',
+      'Telur',
+      'Dadih'
+    ],
+    nutrition: {
+      servingSize: '30 gr (1 Pcs)',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '74,65 kkal',
+        energyFromFat: '32,04 kkal',
+        totalFat: '3,56 gr',
+        protein: '1,89 gr',
+        carbohydrate: '32,86 gr'
+      }
+    },
+    price: 'Rp. 5000'
+  },
+  {
+    id: 3,
+    name: 'Salad Buah Vla Dadih',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto salad buah
+    tag: 'Produk',
+    composition: [
+      'Buah-buahan segar',
+      'Vla dadih',
+      'Potongan jelly'
+    ],
+    nutrition: {
+      servingSize: '100 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '114,1 kkal',
+        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
+        totalFat: '7 gr',
+        protein: '8,4 gr',
+        carbohydrate: '23,2 gr'
+      }
+    },
+    price: 'Rp. 15000'
+  },
+  {
+    id: 4,
+    name: 'Tepung Dadih Susu Sapi',
+    shelfLife: '1 bulan',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto tepung dadih
+    tag: 'Produk',
+    composition: [
+      'Susu sapi difermentasikan'
+    ],
+    nutrition: {
+      servingSize: '3 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '9,65 kkal',
+        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
+        totalFat: '0,25 gr',
+        protein: '0,36 gr',
+        carbohydrate: '1,5 gr'
+      }
+    },
+    price: 'Rp. 5000'
   }
 ];
