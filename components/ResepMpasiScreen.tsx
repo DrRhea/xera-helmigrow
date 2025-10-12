@@ -18,6 +18,7 @@ import MpasiDetailScreen1223 from './MpasiDetailScreen12-23';
 import MpasiDetailScreen25 from './MpasiDetailScreen2-5';
 import MpasiDetailScreenIbuHamil from './MpasiDetailScreenIbuHamil';
 import ChatDoctorScreen from './ChatDoctorScreen';
+import KontenScreen from './KontenScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,6 +30,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
   const [showMpasiDetail, setShowMpasiDetail] = useState(false);
   const [selectedMpasiId, setSelectedMpasiId] = useState<number | null>(null);
   const [showChatDoctor, setShowChatDoctor] = useState(false);
+  const [showKonten, setShowKonten] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -57,6 +59,14 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
 
   const handleBackFromChatDoctor = () => {
     setShowChatDoctor(false);
+  };
+
+  const handleKonten = () => {
+    setShowKonten(true);
+  };
+
+  const handleBackFromKonten = () => {
+    setShowKonten(false);
   };
 
   const bottomNavItems = [
@@ -143,6 +153,10 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
     </TouchableOpacity>
   );
 
+  if (showKonten) {
+    return <KontenScreen onBack={handleBackFromKonten} />;
+  }
+
   if (showChatDoctor) {
     return <ChatDoctorScreen onBack={handleBackFromChatDoctor} />;
   }
@@ -207,6 +221,8 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
             onPress={() => {
               if (item.id === 1) { // Home
                 onBack(); // Go back to home screen
+              } else if (item.id === 2) { // Konten
+                handleKonten();
               } else if (item.id === 3) { // Chat Dokter
                 handleChatDoctor();
               }
