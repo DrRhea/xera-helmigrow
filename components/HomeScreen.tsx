@@ -10,11 +10,12 @@ import {
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import AddChildScreen from './AddChildScreen';
 import ImunisasiScreen from './ImunisasiScreen';
 import ResepMpasiScreen from './ResepMpasiScreen';
+import ChatDoctorScreen from './ChatDoctorScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showAddChild, setShowAddChild] = useState(false);
   const [showImunisasi, setShowImunisasi] = useState(false);
   const [showResepMpasi, setShowResepMpasi] = useState(false);
+  const [showChatDoctor, setShowChatDoctor] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -67,6 +69,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowResepMpasi(false);
   };
 
+  const handleChatDoctor = () => {
+    setShowChatDoctor(true);
+  };
+
+  const handleBackFromChatDoctor = () => {
+    setShowChatDoctor(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -88,6 +98,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     return (
       <ResepMpasiScreen 
         onBack={handleBackFromResepMpasi}
+      />
+    );
+  }
+
+  if (showChatDoctor) {
+    return (
+      <ChatDoctorScreen 
+        onBack={handleBackFromChatDoctor}
       />
     );
   }
@@ -118,11 +136,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   ];
 
   const bottomNavItems = [
-    { id: 1, icon: 'home', label: 'Home', active: true },
-    { id: 2, icon: 'document-text', label: 'Konten', active: false },
-    { id: 3, icon: 'medical', label: 'Chat Dokter', active: false },
-    { id: 4, icon: 'receipt', label: 'Transaksi', active: false },
-    { id: 5, icon: 'person', label: 'Profil', active: false },
+    { id: 1, iconImage: require('../assets/icon navigasi/icon-home.png'), label: 'Home', active: true },
+    { id: 2, iconImage: require('../assets/icon navigasi/icon-konten.png'), label: 'Konten', active: false },
+    { id: 3, iconImage: require('../assets/icon navigasi/icon-chat-dokter.png'), label: 'Chat Dokter', active: false },
+    { id: 4, iconImage: require('../assets/icon navigasi/icon-transaksi.png'), label: 'Transaksi', active: false },
+    { id: 5, iconImage: require('../assets/icon navigasi/icon-profil.png'), label: 'Profil', active: false },
   ];
 
   const renderFeatureIcon = ({ item }: { item: any }) => (
@@ -265,9 +283,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           </View>
         </LinearGradient>
 
-        {/* Content Carousel Placeholder */}
+        {/* Content Carousel */}
         <View style={styles.carouselPlaceholder}>
-          <Text style={styles.placeholderText}>Content Carousel</Text>
+          <View style={styles.carouselContent}>
+            <Image
+              source={require('../assets/rumah-gadang-background.png')}
+              style={styles.carouselImage}
+              resizeMode="cover"
+            />
+            <View style={styles.carouselOverlay}>
+              <Text style={styles.carouselTitle}>Selamat Datang di HelmiGrow</Text>
+              <Text style={styles.carouselSubtitle}>Panduan Lengkap Tumbuh Kembang Anak</Text>
+            </View>
+          </View>
         </View>
         <View style={styles.carouselDots}>
           <View style={[styles.dot, styles.activeDot]} />
@@ -295,17 +323,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
         {bottomNavItems.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.navItem}>
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.navItem}
+            onPress={() => {
+              if (item.id === 1) { // Home
+                // Already on home, do nothing or could add some feedback
+              } else if (item.id === 3) { // Chat Dokter
+                handleChatDoctor();
+              }
+            }}
+          >
             <View style={[styles.navIcon, item.active && styles.activeNavIcon]}>
-              <Ionicons 
-                name={item.icon as any} 
-                size={20} 
-                color={item.active ? '#FFFFFF' : '#FF6B9D'} 
+              <Image
+                source={item.iconImage}
+                style={item.id === 3 ? styles.chatDoctorIcon : styles.navIconImage}
+                resizeMode="contain"
               />
             </View>
-            <Text style={styles.navLabel}>
-              {item.label}
-            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -316,7 +351,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF5F5',
   },
   scrollView: {
     flex: 1,
@@ -328,6 +363,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 20,
+    backgroundColor: '#FFF5F5',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -515,17 +551,42 @@ const styles = StyleSheet.create({
   },
   carouselPlaceholder: {
     height: 150,
-    backgroundColor: '#F5F5F5',
     marginHorizontal: 20,
     borderRadius: 15,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  carouselContent: {
+    flex: 1,
+    position: 'relative',
+  },
+  carouselImage: {
+    width: '100%',
+    height: '100%',
+  },
+  carouselOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    paddingHorizontal: 20,
   },
-  placeholderText: {
-    fontSize: 16,
+  carouselTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  carouselSubtitle: {
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: '#999999',
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
   contentSection: {
     marginBottom: 30,
@@ -604,6 +665,14 @@ const styles = StyleSheet.create({
   },
   navIcon: {
     marginBottom: 4,
+  },
+  navIconImage: {
+    width: 32,
+    height: 32,
+  },
+  chatDoctorIcon: {
+    width: 40,
+    height: 40,
   },
   activeNavIcon: {
     backgroundColor: '#4A90E2',

@@ -13,6 +13,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import MpasiDetailScreen from './MpasiDetailScreen';
+import MpasiDetailScreen0911 from './MpasiDetailScreen09-11';
+import MpasiDetailScreen1223 from './MpasiDetailScreen12-23';
+import MpasiDetailScreen25 from './MpasiDetailScreen2-5';
+import MpasiDetailScreenIbuHamil from './MpasiDetailScreenIbuHamil';
+import ChatDoctorScreen from './ChatDoctorScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,6 +27,8 @@ interface ResepMpasiScreenProps {
 
 const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
   const [showMpasiDetail, setShowMpasiDetail] = useState(false);
+  const [selectedMpasiId, setSelectedMpasiId] = useState<number | null>(null);
+  const [showChatDoctor, setShowChatDoctor] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -34,20 +41,30 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
     return null;
   }
 
-  const handleMpasiDetail = () => {
+  const handleMpasiDetail = (id: number) => {
+    setSelectedMpasiId(id);
     setShowMpasiDetail(true);
   };
 
   const handleBackFromMpasiDetail = () => {
     setShowMpasiDetail(false);
+    setSelectedMpasiId(null);
+  };
+
+  const handleChatDoctor = () => {
+    setShowChatDoctor(true);
+  };
+
+  const handleBackFromChatDoctor = () => {
+    setShowChatDoctor(false);
   };
 
   const bottomNavItems = [
-    { id: 1, icon: 'home', label: 'Home', active: false },
-    { id: 2, icon: 'document-text', label: 'Konten', active: true },
-    { id: 3, icon: 'medical', label: 'Chat Dokter', active: false },
-    { id: 4, icon: 'receipt', label: 'Transaksi', active: false },
-    { id: 5, icon: 'person', label: 'Profil', active: false },
+    { id: 1, iconImage: require('../assets/icon navigasi/icon-home.png'), label: 'Home', active: false },
+    { id: 2, iconImage: require('../assets/icon navigasi/icon-konten.png'), label: 'Konten', active: true },
+    { id: 3, iconImage: require('../assets/icon navigasi/icon-chat-dokter.png'), label: 'Chat Dokter', active: false },
+    { id: 4, iconImage: require('../assets/icon navigasi/icon-transaksi.png'), label: 'Transaksi', active: false },
+    { id: 5, iconImage: require('../assets/icon navigasi/icon-profil.png'), label: 'Profil', active: false },
   ];
 
   const recipeData = [
@@ -78,7 +95,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
     {
       id: 4,
       title: 'Kebutuhan MP-ASI',
-      subtitle: 'Usia 02-03 Tahun',
+      subtitle: 'Usia 02-05 Tahun',
       image: require('../assets/mpasi/profil-mpasi-2-5-tahun.png'),
       badge: 'LANJUTKAN PEMBERIAN ASI 30%',
       rating: 5,
@@ -96,7 +113,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
   const renderRecipeCard = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.recipeCard}
-      onPress={item.id === 1 ? handleMpasiDetail : undefined}
+      onPress={() => handleMpasiDetail(item.id)}
     >
       <View style={styles.cardImageContainer}>
         <Image
@@ -126,8 +143,25 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
     </TouchableOpacity>
   );
 
+  if (showChatDoctor) {
+    return <ChatDoctorScreen onBack={handleBackFromChatDoctor} />;
+  }
+
   if (showMpasiDetail) {
-    return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+    switch (selectedMpasiId) {
+      case 1:
+        return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+      case 2:
+        return <MpasiDetailScreen0911 onBack={handleBackFromMpasiDetail} />;
+      case 3:
+        return <MpasiDetailScreen1223 onBack={handleBackFromMpasiDetail} />;
+      case 4:
+        return <MpasiDetailScreen25 onBack={handleBackFromMpasiDetail} />;
+      case 5:
+        return <MpasiDetailScreenIbuHamil onBack={handleBackFromMpasiDetail} />;
+      default:
+        return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+    }
   }
 
   return (
@@ -167,17 +201,24 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
         {bottomNavItems.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.navItem}>
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.navItem}
+            onPress={() => {
+              if (item.id === 1) { // Home
+                onBack(); // Go back to home screen
+              } else if (item.id === 3) { // Chat Dokter
+                handleChatDoctor();
+              }
+            }}
+          >
             <View style={[styles.navIcon, item.active && styles.activeNavIcon]}>
-              <Ionicons 
-                name={item.icon as any} 
-                size={20} 
-                color={item.active ? '#FFFFFF' : '#FF6B9D'} 
+              <Image
+                source={item.iconImage}
+                style={item.id === 3 ? styles.chatDoctorIcon : styles.navIconImage}
+                resizeMode="contain"
               />
             </View>
-            <Text style={styles.navLabel}>
-              {item.label}
-            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -312,6 +353,14 @@ const styles = StyleSheet.create({
   },
   navIcon: {
     marginBottom: 4,
+  },
+  navIconImage: {
+    width: 32,
+    height: 32,
+  },
+  chatDoctorIcon: {
+    width: 40,
+    height: 40,
   },
   activeNavIcon: {
     backgroundColor: '#4A90E2',
