@@ -346,13 +346,12 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   productTag: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
     backgroundColor: '#FF6B9D',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
   productTagText: {
     fontSize: 10,
@@ -361,7 +360,8 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    paddingVertical: 5,
   },
   productName: {
     fontSize: 14,
