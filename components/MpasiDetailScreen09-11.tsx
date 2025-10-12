@@ -15,11 +15,11 @@ import { mpasiData, MpasiRecipe } from '../data/mpasiData';
 
 const { width, height } = Dimensions.get('window');
 
-interface MpasiDetailScreen09-11Props {
+interface MpasiDetailScreen0911Props {
   onBack: () => void;
 }
 
-const MpasiDetailScreen09-11: React.FC<MpasiDetailScreen09-11Props> = ({ onBack }) => {
+const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack }) => {
   const [selectedRecipe, setSelectedRecipe] = useState<MpasiRecipe | null>(null);
   
   let [fontsLoaded] = useFonts({
@@ -350,4 +350,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MpasiDetailScreen09-11;
+export default MpasiDetailScreen0911;
