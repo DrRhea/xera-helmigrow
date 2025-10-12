@@ -20,6 +20,7 @@ import KontenScreen from './KontenScreen';
 import ChildProfileScreen from './ChildProfileScreen';
 import GrowthChartScreen from './GrowthChartScreen';
 import ProductInfoScreen from './ProductInfoScreen';
+import DiariAnakScreen from './DiariAnakScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,6 +38,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [showProductInfo, setShowProductInfo] = useState(false);
   const [showGrowthChart, setShowGrowthChart] = useState(false);
+  const [showDiariAnak, setShowDiariAnak] = useState(false);
 
   // Data anak yang sudah ada
   const childrenData = [
@@ -144,6 +146,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowGrowthChart(false);
   };
 
+  const handleDiariAnak = () => {
+    setShowDiariAnak(true);
+  };
+
+  const handleBackFromDiariAnak = () => {
+    setShowDiariAnak(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -210,6 +220,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     );
   }
 
+  if (showDiariAnak) {
+    return (
+      <DiariAnakScreen 
+        onBack={handleBackFromDiariAnak}
+      />
+    );
+  }
+
   const featureIcons = [
     { id: 1, icon: require('../assets/icons/jadwal-imunisasi.png'), label: 'Jadwal Imuninasi' },
     { id: 2, icon: require('../assets/icons/resep-mpasi.png'), label: 'Resep MPASI' },
@@ -253,11 +271,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           handleImunisasi();
         } else if (item.id === 2) { // Resep MPASI
           handleResepMpasi();
-        } else if (item.id === 3) { // Grafik Tumbuhi
-          handleGrowthChart();
-        } else if (item.id === 6) { // Info Produk
-          handleProductInfo();
-        }
+            } else if (item.id === 3) { // Grafik Tumbuhi
+              handleGrowthChart();
+            } else if (item.id === 6) { // Info Produk
+              handleProductInfo();
+            } else if (item.id === 7) { // Diari Anak
+              handleDiariAnak();
+            }
         // Add other navigation handlers here for other icons
       }}
     >
@@ -305,12 +325,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
               resizeMode="contain"
             />
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications" size={24} color="#000000" />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>1</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.userButton}>
+              <Ionicons name="person" size={24} color="#000000" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Ionicons name="notifications" size={24} color="#000000" />
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>1</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Greeting */}
@@ -517,10 +542,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerLogo: {
     width: 120,
     height: 40,
     marginRight: 10,
+  },
+  userButton: {
+    padding: 8,
+    marginRight: 8,
   },
   notificationButton: {
     position: 'relative',
