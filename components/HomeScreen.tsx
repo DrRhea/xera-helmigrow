@@ -225,13 +225,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
       id: 1,
       title: 'Dadiah',
       description: 'Makanan Pencegah Stunting',
-      image: '🥣', // Placeholder emoji
+      image: require('../assets/home/foto-dadiah.png'),
+      isImage: true,
     },
     {
       id: 2,
       title: 'Dadiah',
       description: 'Makanan Pencegah Stunting',
-      image: '🥣', // Placeholder emoji
+      image: require('../assets/home/foto-dadiah.png'),
+      isImage: true,
     },
   ];
 
@@ -273,7 +275,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const renderContentCard = ({ item }: { item: any }) => (
     <View style={styles.contentCard}>
       <View style={styles.cardImage}>
-        <Text style={styles.cardImageEmoji}>{item.image}</Text>
+        {item.isImage ? (
+          <Image
+            source={item.image}
+            style={styles.cardImagePhoto}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.cardImageEmoji}>{item.image}</Text>
+        )}
       </View>
       <Text style={styles.cardTitle}>{item.title}</Text>
       <Text style={styles.cardDescription}>{item.description}</Text>
@@ -836,6 +846,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
+    overflow: 'hidden',
+  },
+  cardImagePhoto: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
   },
   cardImageEmoji: {
     fontSize: 40,
