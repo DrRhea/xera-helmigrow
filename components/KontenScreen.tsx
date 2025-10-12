@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    alignSelf: 'flex-start',
   },
   tagText: {
     fontSize: 10,
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
   viewCountText: {
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
-    color: '#FF6B9D',
+    color: '#333333',
     marginLeft: 4,
   },
   bottomSpacing: {
