@@ -18,6 +18,7 @@ import ResepMpasiScreen from './ResepMpasiScreen';
 import ChatDoctorScreen from './ChatDoctorScreen';
 import KontenScreen from './KontenScreen';
 import ChildProfileScreen from './ChildProfileScreen';
+import GrowthChartScreen from './GrowthChartScreen';
 import ProductInfoScreen from './ProductInfoScreen';
 
 const { width, height } = Dimensions.get('window');
@@ -35,6 +36,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showChildProfile, setShowChildProfile] = useState(false);
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [showProductInfo, setShowProductInfo] = useState(false);
+  const [showGrowthChart, setShowGrowthChart] = useState(false);
 
   // Data anak yang sudah ada
   const childrenData = [
@@ -134,6 +136,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowProductInfo(false);
   };
 
+  const handleGrowthChart = () => {
+    setShowGrowthChart(true);
+  };
+
+  const handleBackFromGrowthChart = () => {
+    setShowGrowthChart(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -192,6 +202,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     );
   }
 
+  if (showGrowthChart) {
+    return (
+      <GrowthChartScreen 
+        onBack={handleBackFromGrowthChart}
+      />
+    );
+  }
+
   const featureIcons = [
     { id: 1, icon: require('../assets/icons/jadwal-imunisasi.png'), label: 'Jadwal Imuninasi' },
     { id: 2, icon: require('../assets/icons/resep-mpasi.png'), label: 'Resep MPASI' },
@@ -233,6 +251,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           handleImunisasi();
         } else if (item.id === 2) { // Resep MPASI
           handleResepMpasi();
+        } else if (item.id === 3) { // Grafik Tumbuhi
+          handleGrowthChart();
         } else if (item.id === 6) { // Info Produk
           handleProductInfo();
         }
