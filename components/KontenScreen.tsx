@@ -176,7 +176,7 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIcon, styles.activeNavIcon]}>
+          <View style={styles.navIcon}>
             <Image
               source={require('../assets/icon navigasi/icon-konten.png')}
               style={styles.navIconImage}
@@ -359,15 +359,6 @@ const styles = StyleSheet.create({
   chatDoctorIcon: {
     width: 40,
     height: 40,
-  },
-  activeNavIcon: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 25,
-    padding: 10,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 

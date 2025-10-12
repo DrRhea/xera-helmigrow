@@ -452,7 +452,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
               }
             }}
           >
-            <View style={[styles.navIcon, item.active && styles.activeNavIcon]}>
+            <View style={styles.navIcon}>
               <Image
                 source={item.iconImage}
                 style={item.id === 3 ? styles.chatDoctorIcon : styles.navIconImage}
@@ -873,15 +873,6 @@ const styles = StyleSheet.create({
   chatDoctorIcon: {
     width: 40,
     height: 40,
-  },
-  activeNavIcon: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 25,
-    padding: 10,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   navLabel: {
     fontSize: 10,
