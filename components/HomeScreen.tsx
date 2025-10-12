@@ -16,6 +16,9 @@ import AddChildScreen from './AddChildScreen';
 import ImunisasiScreen from './ImunisasiScreen';
 import ResepMpasiScreen from './ResepMpasiScreen';
 import ChatDoctorScreen from './ChatDoctorScreen';
+import KontenScreen from './KontenScreen';
+import ChildProfileScreen from './ChildProfileScreen';
+import ProductInfoScreen from './ProductInfoScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,6 +31,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showImunisasi, setShowImunisasi] = useState(false);
   const [showResepMpasi, setShowResepMpasi] = useState(false);
   const [showChatDoctor, setShowChatDoctor] = useState(false);
+  const [showKonten, setShowKonten] = useState(false);
+  const [showChildProfile, setShowChildProfile] = useState(false);
+  const [selectedChild, setSelectedChild] = useState<any>(null);
+  const [showProductInfo, setShowProductInfo] = useState(false);
+
+  // Data anak yang sudah ada
+  const childrenData = [
+    {
+      id: 1,
+      name: 'Anak 1',
+      age: '9 Tahun 0 Bulan',
+      avatar: require('../assets/icons/ikon-bayi.png'),
+      gender: 'Laki-laki',
+      birthDate: '2015-01-15',
+      weight: 28.5,
+      height: 125.0,
+      bloodType: 'O+',
+      allergies: ['Susu sapi'],
+      medicalHistory: ['Imunisasi lengkap'],
+      parentName: 'Febrinaldo',
+      parentPhone: '+6281234567890',
+      emergencyContact: '+6281234567891',
+      address: 'Jl. Contoh No. 123, Jakarta',
+      notes: 'Anak yang aktif dan sehat'
+    }
+  ];
+
+  const hasChildren = childrenData.length > 0;
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -77,6 +108,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowChatDoctor(false);
   };
 
+  const handleKonten = () => {
+    setShowKonten(true);
+  };
+
+  const handleBackFromKonten = () => {
+    setShowKonten(false);
+  };
+
+  const handleChildProfile = (child: any) => {
+    setSelectedChild(child);
+    setShowChildProfile(true);
+  };
+
+  const handleBackFromChildProfile = () => {
+    setShowChildProfile(false);
+    setSelectedChild(null);
+  };
+
+  const handleProductInfo = () => {
+    setShowProductInfo(true);
+  };
+
+  const handleBackFromProductInfo = () => {
+    setShowProductInfo(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -106,6 +163,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     return (
       <ChatDoctorScreen 
         onBack={handleBackFromChatDoctor}
+      />
+    );
+  }
+
+  if (showKonten) {
+    return (
+      <KontenScreen 
+        onBack={handleBackFromKonten}
+      />
+    );
+  }
+
+  if (showChildProfile && selectedChild) {
+    return (
+      <ChildProfileScreen 
+        onBack={handleBackFromChildProfile} 
+        childData={selectedChild} 
+      />
+    );
+  }
+
+  if (showProductInfo) {
+    return (
+      <ProductInfoScreen 
+        onBack={handleBackFromProductInfo}
       />
     );
   }
@@ -151,6 +233,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           handleImunisasi();
         } else if (item.id === 2) { // Resep MPASI
           handleResepMpasi();
+        } else if (item.id === 6) { // Info Produk
+          handleProductInfo();
         }
         // Add other navigation handlers here for other icons
       }}
@@ -207,35 +291,65 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           <Text style={styles.sectionTitleText}>Profil Anak</Text>
         </View>
 
-        <LinearGradient
-          colors={['#3FB2E6', '#B3E8FF']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.childProfileCard}
-        >
-          <View style={styles.childProfileContent}>
-            <View style={styles.childIcons}>
-              <Image
-                source={require('../assets/icons/ikon-bayi.png')}
-                style={styles.childIconImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.childProfileText}>
-              <Text style={styles.childProfileTitle}>Mom Dad belum Punya Profil Anak</Text>
-              <TouchableOpacity style={styles.addChildButton} onPress={handleAddChild}>
-                <LinearGradient
-                  colors={['#F15797', '#FFFDED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.addChildGradient}
-                >
-                  <Text style={styles.addChildText}>+ Tambahkan Anak</Text>
-                </LinearGradient>
+        {hasChildren ? (
+          <View style={styles.childrenContainer}>
+            {childrenData.map((child) => (
+              <TouchableOpacity 
+                key={child.id} 
+                style={styles.childCard}
+                onPress={() => handleChildProfile(child)}
+              >
+                <View style={styles.childAvatarContainer}>
+                  <Image
+                    source={child.avatar}
+                    style={styles.childAvatar}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.childInfo}>
+                  <Text style={styles.childName}>{child.name}</Text>
+                  <Text style={styles.childAge}>{child.age}</Text>
+                </View>
               </TouchableOpacity>
-            </View>
+            ))}
+            <TouchableOpacity style={styles.addChildCard} onPress={handleAddChild}>
+              <View style={styles.addChildIconContainer}>
+                <Ionicons name="add" size={32} color="#FF6B9D" />
+              </View>
+              <Text style={styles.addChildCardText}>Tambah Profil Anak</Text>
+            </TouchableOpacity>
           </View>
-        </LinearGradient>
+        ) : (
+          <LinearGradient
+            colors={['#3FB2E6', '#B3E8FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.childProfileCard}
+          >
+            <View style={styles.childProfileContent}>
+              <View style={styles.childIcons}>
+                <Image
+                  source={require('../assets/icons/ikon-bayi.png')}
+                  style={styles.childIconImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.childProfileText}>
+                <Text style={styles.childProfileTitle}>Mom Dad belum Punya Profil Anak</Text>
+                <TouchableOpacity style={styles.addChildButton} onPress={handleAddChild}>
+                  <LinearGradient
+                    colors={['#F15797', '#FFFDED']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.addChildGradient}
+                  >
+                    <Text style={styles.addChildText}>+ Tambahkan Anak</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </LinearGradient>
+        )}
 
         {/* Feature Icons */}
         <View style={styles.featureSection}>
@@ -255,33 +369,35 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         </View>
 
         {/* Manjujai Banner */}
-        <LinearGradient
-          colors={['#F267A0', '#FEF8EB']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.manjujaiBanner}
-        >
-          <View style={styles.manjujaiContent}>
-            <View style={styles.manjujaiImage}>
-              <Image
-                source={require('../assets/icons/manjujai.png')}
-                style={styles.manjujaiIcon}
-                resizeMode="contain"
-              />
+        <TouchableOpacity onPress={handleKonten}>
+          <LinearGradient
+            colors={['#F267A0', '#FEF8EB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.manjujaiBanner}
+          >
+            <View style={styles.manjujaiContent}>
+              <View style={styles.manjujaiImage}>
+                <Image
+                  source={require('../assets/icons/manjujai.png')}
+                  style={styles.manjujaiIcon}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.manjujaiText}>
+                <Text style={styles.manjujaiTitle}>Manjujai</Text>
+                <Text style={styles.manjujaiSubtitle}>Video & Edukasi Manjujai</Text>
+              </View>
+              <TouchableOpacity style={styles.manjujaiArrow}>
+                <Image
+                  source={require('../assets/icons/panah-manjujai.png')}
+                  style={styles.manjujaiArrowIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
             </View>
-            <View style={styles.manjujaiText}>
-              <Text style={styles.manjujaiTitle}>Manjujai</Text>
-              <Text style={styles.manjujaiSubtitle}>Video & Edukasi Manjujai</Text>
-            </View>
-            <TouchableOpacity style={styles.manjujaiArrow}>
-              <Image
-                source={require('../assets/icons/panah-manjujai.png')}
-                style={styles.manjujaiArrowIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
+          </LinearGradient>
+        </TouchableOpacity>
 
         {/* Content Carousel */}
         <View style={styles.carouselPlaceholder}>
@@ -329,6 +445,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             onPress={() => {
               if (item.id === 1) { // Home
                 // Already on home, do nothing or could add some feedback
+              } else if (item.id === 2) { // Konten
+                handleKonten();
               } else if (item.id === 3) { // Chat Dokter
                 handleChatDoctor();
               }
@@ -440,6 +558,82 @@ const styles = StyleSheet.create({
     marginBottom: 8, // Reduced spacing
     lineHeight: 16, // Reduced line height
   },
+  childrenContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    gap: 12,
+  },
+  childCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    minWidth: 120,
+  },
+  childAvatarContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#E3F2FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  childAvatar: {
+    width: 40,
+    height: 40,
+  },
+  childInfo: {
+    alignItems: 'center',
+  },
+  childName: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  childAge: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+  },
+  addChildCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    minWidth: 120,
+    borderWidth: 2,
+    borderColor: '#FF6B9D',
+    borderStyle: 'dashed',
+  },
+  addChildIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFF5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   addChildButton: {
     width: 145,
     height: 18,
@@ -458,6 +652,12 @@ const styles = StyleSheet.create({
     fontSize: 13, // Slightly larger for better readability
     fontFamily: 'Poppins_600SemiBold',
     color: '#000000',
+  },
+  addChildCardText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#FF6B9D',
+    textAlign: 'center',
   },
   featureSection: {
     marginBottom: 30,
