@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import MpasiDetailScreen from './MpasiDetailScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,6 +21,8 @@ interface ResepMpasiScreenProps {
 }
 
 const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
+  const [showMpasiDetail, setShowMpasiDetail] = useState(false);
+
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -30,6 +33,14 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
   if (!fontsLoaded) {
     return null;
   }
+
+  const handleMpasiDetail = () => {
+    setShowMpasiDetail(true);
+  };
+
+  const handleBackFromMpasiDetail = () => {
+    setShowMpasiDetail(false);
+  };
 
   const bottomNavItems = [
     { id: 1, icon: 'home', label: 'Home', active: false },
@@ -44,7 +55,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       id: 1,
       title: 'Kebutuhan MP-ASI',
       subtitle: 'Usia 06-08 Bulan',
-      image: require('../assets/icons/resep-mpasi.png'),
+      image: require('../assets/mpasi/profil-mpasi-06-08-bulan.png'),
       badge: 'LANJUTKAN PEMBERIAN ASI 70% MP-ASI 30%',
       rating: 5,
     },
@@ -52,7 +63,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       id: 2,
       title: 'Kebutuhan MP-ASI',
       subtitle: 'Usia 09-11 Bulan',
-      image: require('../assets/icons/resep-mpasi.png'),
+      image: require('../assets/mpasi/profil-mpasi-09-11-bulan.png'),
       badge: 'LANJUTKAN PEMBERIAN ASI 50% MP-ASI 50%',
       rating: 5,
     },
@@ -60,7 +71,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       id: 3,
       title: 'Kebutuhan MP-ASI',
       subtitle: 'Usia 12-23 Bulan',
-      image: require('../assets/icons/resep-mpasi.png'),
+      image: require('../assets/mpasi/profil-mpasi-12-23-bulan.png'),
       badge: 'LANJUTKAN PEMBERIAN ASI 70%',
       rating: 5,
     },
@@ -68,7 +79,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       id: 4,
       title: 'Kebutuhan MP-ASI',
       subtitle: 'Usia 02-03 Tahun',
-      image: require('../assets/icons/resep-mpasi.png'),
+      image: require('../assets/mpasi/profil-mpasi-2-5-tahun.png'),
       badge: 'LANJUTKAN PEMBERIAN ASI 30%',
       rating: 5,
     },
@@ -76,14 +87,17 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       id: 5,
       title: 'Kebutuhan Gizi',
       subtitle: 'Ibu Hamil',
-      image: require('../assets/icons/resep-mpasi.png'),
+      image: require('../assets/mpasi/profil-mpasi-ibuhamil.png'),
       badge: 'NUTRISI LENGKAP UNTUK IBU HAMIL',
       rating: 5,
     },
   ];
 
   const renderRecipeCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.recipeCard}>
+    <TouchableOpacity 
+      style={styles.recipeCard}
+      onPress={item.id === 1 ? handleMpasiDetail : undefined}
+    >
       <View style={styles.cardImageContainer}>
         <Image
           source={item.image}
@@ -102,7 +116,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
             <Ionicons
               key={index}
               name="star-outline"
-              size={16}
+              size={12}
               color="#FFD700"
               style={styles.star}
             />
@@ -111,6 +125,10 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
       </View>
     </TouchableOpacity>
   );
+
+  if (showMpasiDetail) {
+    return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+  }
 
   return (
     <View style={styles.fullScreenContainer}>
@@ -154,10 +172,10 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
               <Ionicons 
                 name={item.icon as any} 
                 size={20} 
-                color={item.active ? '#FF6B9D' : '#666666'} 
+                color={item.active ? '#FFFFFF' : '#FF6B9D'} 
               />
             </View>
-            <Text style={[styles.navLabel, item.active && styles.activeNavLabel]}>
+            <Text style={styles.navLabel}>
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -201,21 +219,21 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 80,
+    paddingBottom: 60,
   },
   gridContainer: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 5,
   },
   row: {
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   recipeCard: {
     width: (width - 60) / 2,
     backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    marginBottom: 20,
+    borderRadius: 12,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -264,17 +282,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
     color: '#666666',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   star: {
-    marginRight: 2,
+    marginRight: 1,
   },
   bottomSpacing: {
-    height: 40,
+    height: 20,
   },
   bottomNavigation: {
     position: 'absolute',
@@ -282,32 +300,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
+    backgroundColor: '#FFF5F5',
+    paddingVertical: 12,
     paddingHorizontal: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
   },
   navIcon: {
-    marginBottom: 5,
+    marginBottom: 4,
   },
   activeNavIcon: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 20,
-    padding: 8,
+    backgroundColor: '#4A90E2',
+    borderRadius: 25,
+    padding: 10,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   navLabel: {
     fontSize: 10,
     fontFamily: 'Poppins_400Regular',
-    color: '#666666',
-  },
-  activeNavLabel: {
-    color: '#FF6B9D',
-    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
   },
 });
 

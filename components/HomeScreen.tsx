@@ -300,10 +300,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
               <Ionicons 
                 name={item.icon as any} 
                 size={20} 
-                color={item.active ? '#FF6B9D' : '#666666'} 
+                color={item.active ? '#FFFFFF' : '#FF6B9D'} 
               />
             </View>
-            <Text style={[styles.navLabel, item.active && styles.activeNavLabel]}>
+            <Text style={styles.navLabel}>
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -592,32 +592,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
+    backgroundColor: '#FFF5F5',
+    paddingVertical: 12,
     paddingHorizontal: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
   },
   navIcon: {
-    marginBottom: 5,
+    marginBottom: 4,
   },
   activeNavIcon: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 20,
-    padding: 8,
+    backgroundColor: '#4A90E2',
+    borderRadius: 25,
+    padding: 10,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   navLabel: {
     fontSize: 10,
     fontFamily: 'Poppins_400Regular',
-    color: '#666666',
-  },
-  activeNavLabel: {
-    color: '#FF6B9D',
-    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
   },
 });
 
