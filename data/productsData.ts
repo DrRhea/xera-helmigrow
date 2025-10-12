@@ -104,7 +104,7 @@ export const productsData: ProductData[] = [
     id: 4,
     name: 'Tepung Dadih Susu Sapi',
     shelfLife: '1 bulan',
-    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto tepung dadih
+    image: require('../assets/info-produk/tepung-dadih-susu-sapi.png'),
     tag: 'Produk',
     composition: [
       'Susu sapi difermentasikan'
@@ -118,6 +118,110 @@ export const productsData: ProductData[] = [
         totalFat: '0,25 gr',
         protein: '0,36 gr',
         carbohydrate: '1,5 gr'
+      }
+    },
+    price: 'Rp. 5000'
+  },
+  {
+    id: 5,
+    name: 'Healthy Cookies',
+    shelfLife: '1 bulan - suhu ruang',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'),
+    tag: 'Produk',
+    composition: [
+      'Tepung kacang merah',
+      'Tepung kacang kedelai',
+      'Tepung jagung',
+      'Tepung terigu',
+      'Putih telur',
+      'Gula',
+      'Margarin'
+    ],
+    nutrition: {
+      servingSize: '40 gr (20 Pcs)',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '316 kkal',
+        energyFromFat: '189 kkal',
+        totalFat: '21 gr',
+        protein: '4,4 gr',
+        carbohydrate: '26,8 gr'
+      }
+    },
+    price: 'Rp. 25000'
+  },
+  {
+    id: 6,
+    name: 'Puding Dadih',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto puding dadih
+    tag: 'Produk',
+    composition: [
+      'Agar',
+      'Kental manis',
+      'Saus mangga atau bubuk coklat (tergantung varian)',
+      'Dadih'
+    ],
+    nutrition: {
+      servingSize: '35 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '83,72 kkal',
+        energyFromFat: '26,46 kkal',
+        totalFat: '2,94 gr',
+        protein: '1,74 gr',
+        carbohydrate: '13,54 gr'
+      }
+    },
+    price: 'Rp. 5000'
+  },
+  {
+    id: 7,
+    name: 'Puding Telang',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto puding telang
+    tag: 'Produk',
+    composition: [
+      'Agar',
+      'Susu UHT',
+      'Ekstrak bunga telang',
+      'Gula pasir'
+    ],
+    nutrition: {
+      servingSize: '35 gram',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '83,72 kkal',
+        energyFromFat: '26,46 kkal',
+        totalFat: '2,94 gr',
+        protein: '1,74 gr',
+        carbohydrate: '13,54 gr'
+      }
+    },
+    price: 'Rp. 5000'
+  },
+  {
+    id: 8,
+    name: 'Crust Pie Buah',
+    shelfLife: '1 hari – suhu ruang, 3 hari – suhu lemari pendingin',
+    image: require('../assets/info-produk/healthy-cookies.jpeg'), // Placeholder, bisa diganti dengan foto crust pie buah
+    tag: 'Produk',
+    composition: [
+      'Tepung komposit',
+      'Kuning telur',
+      'Margarin',
+      'Buah-buahan',
+      'Vla dadih'
+    ],
+    nutrition: {
+      servingSize: '30 gr (1 pcs)',
+      servingsPerPackage: '1 sajian dalam kemasan',
+      perServing: {
+        totalEnergy: '90,21 kkal',
+        energyFromFat: '0 kkal', // Tidak ada data energi dari lemak
+        totalFat: '3,89 gr',
+        protein: '2,19 gr',
+        carbohydrate: '12,84 gr'
       }
     },
     price: 'Rp. 5000'
