@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,14 +11,17 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { mpasiData, MpasiRecipe } from '../data/mpasiData';
 
 const { width, height } = Dimensions.get('window');
 
-interface MpasiDetailScreen0911Props {
+interface MpasiDetailScreen09-11Props {
   onBack: () => void;
 }
 
-const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack }) => {
+const MpasiDetailScreen09-11: React.FC<MpasiDetailScreen09-11Props> = ({ onBack }) => {
+  const [selectedRecipe, setSelectedRecipe] = useState<MpasiRecipe | null>(null);
+  
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -30,47 +33,30 @@ const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack })
     return null;
   }
 
-  const recipeData = [
-    {
-      id: 1,
-      title: 'Bubur Nasi',
-      subtitle: 'Daging & Sayuran',
-      rating: 4.8,
-      image: require('../assets/mpasi/karrousel/car1-06-08-bulan.png'),
-    },
-    {
-      id: 2,
-      title: 'Bubur',
-      subtitle: 'Ikan & Tahu',
-      rating: 4.9,
-      image: require('../assets/mpasi/karrousel/car2-06-08-bulan.png'),
-    },
-    {
-      id: 3,
-      title: 'Bubur',
-      subtitle: 'Ayam & Wortel',
-      rating: 4.7,
-      image: require('../assets/mpasi/karrousel/car3-06-08-bulan.png'),
-    },
-    {
-      id: 4,
-      title: 'Bubur',
-      subtitle: 'Sayuran Hijau',
-      rating: 4.6,
-      image: require('../assets/mpasi/karrousel/car4-06-08-bulan.png'),
-    },
-    {
-      id: 5,
-      title: 'Bubur',
-      subtitle: 'Buah & Susu',
-      rating: 4.5,
-      image: require('../assets/mpasi/karrousel/car5-06-08-bulan.png'),
-    }
-  ];
+  // Get data for 9-11 bulan age group
+  const ageGroupData = mpasiData.find(data => data.ageGroup === '9-11 bulan');
+  const currentImage = selectedRecipe ? selectedRecipe.dataImages[0] : ageGroupData?.profileImage;
 
-  const renderRecipeCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.recipeCard}>
-      <Image source={item.image} style={styles.recipeImage} />
+  const handleRecipePress = (recipe: MpasiRecipe) => {
+    setSelectedRecipe(recipe);
+  };
+
+  const renderRecipeCard = ({ item }: { item: MpasiRecipe }) => (
+    <TouchableOpacity 
+      style={styles.recipeCard}
+      onPress={() => handleRecipePress(item)}
+    >
+      <View style={styles.recipeImageContainer}>
+        <Image source={item.thumbnail} style={styles.recipeImage} />
+        <View style={styles.ratingBadge}>
+          <Ionicons name="star" size={12} color="#FFD700" />
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+      </View>
+      <View style={styles.recipeInfo}>
+        <Text style={styles.recipeTitle}>{item.title}</Text>
+        <Text style={styles.recipeSubtitle}>{item.subtitle}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -79,34 +65,32 @@ const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack })
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Image
-            source={require('../assets/icons/back-icon.png')}
-            style={styles.backIcon}
-            resizeMode="contain"
-          />
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={20} color="#000000" />
+          </View>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detail MPASI</Text>
       </View>
 
-      {/* MPASI Card */}
-      <View style={styles.mpasiCard}>
-        <View style={styles.cardContent}>
-          <View style={styles.cardIcon}>
+      {/* Main Action Button */}
+      <View style={styles.actionButtonContainer}>
+        <TouchableOpacity style={styles.actionButton}>
+          <View style={styles.actionButtonContent}>
             <Ionicons name="restaurant" size={24} color="#FFFFFF" />
+            <View style={styles.actionButtonText}>
+              <Text style={styles.actionButtonTitle}>Kebutuhan MP-ASI</Text>
+              <Text style={styles.actionButtonSubtitle}>Usia 09 - 11 Bulan</Text>
+            </View>
           </View>
-          <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>Kebutuhan MP-ASI</Text>
-            <Text style={styles.cardSubtitle}>Usia 09 - 11 Bulan</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Recipe Carousel */}
       <View style={styles.carouselContainer}>
         <FlatList
-          data={recipeData}
+          data={ageGroupData?.recipes || []}
           renderItem={renderRecipeCard}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.carouselContent}
@@ -123,7 +107,7 @@ const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack })
         <View style={styles.mpasiProfileSection}>
           <View style={styles.imageContainer}>
             <Image
-              source={require('../assets/mpasi/profil-mpasi-09-11-bulan.png')}
+              source={currentImage}
               style={styles.mpasiProfileImage}
               resizeMode="contain"
             />
@@ -140,48 +124,45 @@ const MpasiDetailScreen0911: React.FC<MpasiDetailScreen0911Props> = ({ onBack })
           onPress={onBack}
         >
           <View style={styles.navIcon}>
-            <Image
-              source={require('../assets/icon navigasi/icon-home.png')}
-              style={styles.navIconImage}
-              resizeMode="contain"
-            />
+            <Ionicons name="home" size={24} color="#FF0000" />
           </View>
+          <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={onBack}
+        >
           <View style={styles.navIcon}>
-            <Image
-              source={require('../assets/icon navigasi/icon-konten.png')}
-              style={styles.navIconImage}
-              resizeMode="contain"
-            />
+            <Ionicons name="list" size={24} color="#FF0000" />
           </View>
+          <Text style={styles.navLabel}>Konten</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={onBack}
+        >
           <View style={styles.navIcon}>
-            <Image
-              source={require('../assets/icon navigasi/icon-chat-dokter.png')}
-              style={styles.chatDoctorIcon}
-              resizeMode="contain"
-            />
+            <Ionicons name="medical" size={24} color="#87CEEB" />
           </View>
+          <Text style={styles.navLabel}>Chat Dokter</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={onBack}
+        >
           <View style={styles.navIcon}>
-            <Image
-              source={require('../assets/icon navigasi/icon-transaksi.png')}
-              style={styles.navIconImage}
-              resizeMode="contain"
-            />
+            <Ionicons name="card" size={24} color="#FF0000" />
           </View>
+          <Text style={styles.navLabel}>Transaksi</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={onBack}
+        >
           <View style={styles.navIcon}>
-            <Image
-              source={require('../assets/icon navigasi/icon-profil.png')}
-              style={styles.navIconImage}
-              resizeMode="contain"
-            />
+            <Ionicons name="person" size={24} color="#FF0000" />
           </View>
+          <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -202,94 +183,134 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5F5',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+    padding: 5,
   },
-  backIcon: {
-    width: 24,
-    height: 24,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: 'Poppins_700Bold',
-    color: '#000000',
-  },
-  mpasiCard: {
-    backgroundColor: '#4A90E2',
-    marginHorizontal: 20,
-    marginVertical: 16,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  cardIcon: {
+  backButtonCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  cardText: {
-    flex: 1,
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+    marginLeft: 16,
   },
-  cardTitle: {
+  actionButtonContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  actionButton: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  actionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    marginLeft: 15,
+  },
+  actionButtonTitle: {
     fontSize: 16,
     fontFamily: 'Poppins_600SemiBold',
     color: '#FFFFFF',
     marginBottom: 2,
   },
-  cardSubtitle: {
+  actionButtonSubtitle: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: '#FFFFFF',
   },
   carouselContainer: {
-    paddingVertical: 16,
-    backgroundColor: '#FFF5F5',
+    marginBottom: 20,
   },
   carouselContent: {
     paddingHorizontal: 20,
   },
   recipeCard: {
     width: 160,
-    borderRadius: 12,
-    marginRight: 12,
+    height: 200,
+    marginRight: 15,
+    borderRadius: 15,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
+  recipeImageContainer: {
+    position: 'relative',
+    height: '70%',
+  },
   recipeImage: {
-    width: 160,
-    height: 120,
+    width: '100%',
+    height: '100%',
+  },
+  ratingBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#333333',
+    marginLeft: 2,
+  },
+  recipeInfo: {
+    padding: 12,
+    height: '30%',
+    justifyContent: 'center',
+  },
+  recipeTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  recipeSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 80,
   },
   mpasiProfileSection: {
-    paddingVertical: 24,
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    minHeight: 400,
+    alignItems: 'center',
   },
   imageContainer: {
     width: '100%',
@@ -297,7 +318,7 @@ const styles = StyleSheet.create({
   },
   mpasiProfileImage: {
     width: '100%',
-    height: 350,
+    height: height * 0.6, // Make image larger, 60% of screen height
   },
   bottomSpacing: {
     height: 20,
@@ -321,19 +342,12 @@ const styles = StyleSheet.create({
   navIcon: {
     marginBottom: 4,
   },
-  navIconImage: {
-    width: 32,
-    height: 32,
-  },
-  chatDoctorIcon: {
-    width: 40,
-    height: 40,
-  },
   navLabel: {
     fontSize: 10,
     fontFamily: 'Poppins_400Regular',
     color: '#000000',
+    textAlign: 'center',
   },
 });
 
-export default MpasiDetailScreen0911;
+export default MpasiDetailScreen09-11;
