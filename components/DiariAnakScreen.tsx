@@ -32,7 +32,7 @@ const DiariAnakScreen: React.FC<DiariAnakScreenProps> = ({ onBack }) => {
       id: '1',
       title: 'Pertama kali berjalan',
       content: 'Hari ini anak sudah bisa berjalan sendiri tanpa bantuan! Sangat bangga melihat perkembangannya.',
-      date: '13 Oktober 2024',
+      date: '13 Oktober 2025',
       color: '#FFE5B4'
     }
   ]);
