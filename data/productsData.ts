@@ -25,7 +25,7 @@ export const productsData: ProductData[] = [
     id: 1,
     name: 'ROTI TEPUNG KOMPOSIT',
     shelfLife: '7 hari – suhu ruang',
-    image: require('../assets/roti-tepung-komposit.jpeg'),
+    image: require('../assets/info-produk/roti-tepung-komposit.jpeg'),
     tag: 'Produk',
     composition: [
       'Tepung terigu protein tinggi',

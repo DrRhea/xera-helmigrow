@@ -232,7 +232,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
       id: 2,
       title: 'Roti Tepung Komposit',
       description: 'Produk Pangan Bergizi',
-      image: require('../assets/roti-tepung-komposit.jpeg'),
+      image: require('../assets/info-produk/roti-tepung-komposit.jpeg'),
       isImage: true,
     },
   ];
