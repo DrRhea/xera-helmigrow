@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { mpasiData, MpasiRecipe } from '../data/mpasiData';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,6 +20,8 @@ interface MpasiDetailScreenProps {
 }
 
 const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
+  const [selectedRecipe, setSelectedRecipe] = useState<MpasiRecipe | null>(null);
+  
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -30,47 +33,30 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
     return null;
   }
 
-  const recipeData = [
-    {
-      id: 1,
-      title: 'Bubur Singkong',
-      subtitle: 'Isi Ikan & Ayam',
-      rating: 4.8,
-      image: require('../assets/mpasi/karrousel/car1-06-08-bulan.png'),
-    },
-    {
-      id: 2,
-      title: 'Bubur',
-      subtitle: 'Soto Ayam',
-      rating: 4.9,
-      image: require('../assets/mpasi/karrousel/car2-06-08-bulan.png'),
-    },
-    {
-      id: 3,
-      title: 'Bubur',
-      subtitle: 'Daging',
-      rating: 4.7,
-      image: require('../assets/mpasi/karrousel/car3-06-08-bulan.png'),
-    },
-    {
-      id: 4,
-      title: 'Bubur',
-      subtitle: 'Sayuran',
-      rating: 4.6,
-      image: require('../assets/mpasi/karrousel/car4-06-08-bulan.png'),
-    },
-    {
-      id: 5,
-      title: 'Bubur',
-      subtitle: 'Buah',
-      rating: 4.5,
-      image: require('../assets/mpasi/karrousel/car5-06-08-bulan.png'),
-    }
-  ];
+  // Get data for 6-8 bulan age group
+  const ageGroupData = mpasiData.find(data => data.ageGroup === '6-8 bulan');
+  const currentImage = selectedRecipe ? selectedRecipe.dataImages[0] : ageGroupData?.profileImage;
 
-  const renderRecipeCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.recipeCard}>
-      <Image source={item.image} style={styles.recipeImage} />
+  const handleRecipePress = (recipe: MpasiRecipe) => {
+    setSelectedRecipe(recipe);
+  };
+
+  const renderRecipeCard = ({ item }: { item: MpasiRecipe }) => (
+    <TouchableOpacity 
+      style={styles.recipeCard}
+      onPress={() => handleRecipePress(item)}
+    >
+      <View style={styles.recipeImageContainer}>
+        <Image source={item.thumbnail} style={styles.recipeImage} />
+        <View style={styles.ratingBadge}>
+          <Ionicons name="star" size={12} color="#FFD700" />
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+      </View>
+      <View style={styles.recipeInfo}>
+        <Text style={styles.recipeTitle}>{item.title}</Text>
+        <Text style={styles.recipeSubtitle}>{item.subtitle}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -104,9 +90,9 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
       {/* Recipe Carousel */}
       <View style={styles.carouselContainer}>
         <FlatList
-          data={recipeData}
+          data={ageGroupData?.recipes || []}
           renderItem={renderRecipeCard}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.carouselContent}
@@ -123,7 +109,7 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
         <View style={styles.mpasiProfileSection}>
           <View style={styles.imageContainer}>
             <Image
-              source={require('../assets/mpasi/profil-mpasi-06-08-bulan.png')}
+              source={currentImage}
               style={styles.mpasiProfileImage}
               resizeMode="contain"
             />
@@ -269,14 +255,62 @@ const styles = StyleSheet.create({
   },
   recipeCard: {
     width: 160,
-    borderRadius: 12,
-    marginRight: 12,
+    height: 200,
+    marginRight: 15,
+    borderRadius: 15,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
+  recipeImageContainer: {
+    position: 'relative',
+    height: '70%',
+  },
   recipeImage: {
-    width: 160,
-    height: 120,
+    width: '100%',
+    height: '100%',
+  },
+  ratingBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#333333',
+    marginLeft: 2,
+  },
+  recipeInfo: {
+    padding: 12,
+    height: '30%',
+    justifyContent: 'center',
+  },
+  recipeTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  recipeSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
   },
   scrollView: {
     flex: 1,
@@ -297,7 +331,7 @@ const styles = StyleSheet.create({
   },
   mpasiProfileImage: {
     width: '100%',
-    height: 350,
+    height: height * 0.6, // Make image larger, 60% of screen height
   },
   bottomSpacing: {
     height: 20,
