@@ -14,11 +14,11 @@ import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, P
 
 const { width, height } = Dimensions.get('window');
 
-interface MpasiDetailScreenProps {
+interface MpasiDetailScreen1223Props {
   onBack: () => void;
 }
 
-const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
+const MpasiDetailScreen1223: React.FC<MpasiDetailScreen1223Props> = ({ onBack }) => {
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -33,36 +33,36 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
   const recipeData = [
     {
       id: 1,
-      title: 'Bubur Singkong',
-      subtitle: 'Isi Ikan & Ayam',
+      title: 'Nasi Tim',
+      subtitle: 'Daging & Sayuran',
       rating: 4.8,
       image: require('../assets/mpasi/karrousel/car1-06-08-bulan.png'),
     },
     {
       id: 2,
       title: 'Bubur',
-      subtitle: 'Soto Ayam',
+      subtitle: 'Ikan & Tempe',
       rating: 4.9,
       image: require('../assets/mpasi/karrousel/car2-06-08-bulan.png'),
     },
     {
       id: 3,
       title: 'Bubur',
-      subtitle: 'Daging',
+      subtitle: 'Ayam & Kacang',
       rating: 4.7,
       image: require('../assets/mpasi/karrousel/car3-06-08-bulan.png'),
     },
     {
       id: 4,
       title: 'Bubur',
-      subtitle: 'Sayuran',
+      subtitle: 'Sayuran & Telur',
       rating: 4.6,
       image: require('../assets/mpasi/karrousel/car4-06-08-bulan.png'),
     },
     {
       id: 5,
       title: 'Bubur',
-      subtitle: 'Buah',
+      subtitle: 'Buah & Yoghurt',
       rating: 4.5,
       image: require('../assets/mpasi/karrousel/car5-06-08-bulan.png'),
     }
@@ -96,7 +96,7 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
           </View>
           <View style={styles.cardText}>
             <Text style={styles.cardTitle}>Kebutuhan MP-ASI</Text>
-            <Text style={styles.cardSubtitle}>Usia 06 - 08 Bulan</Text>
+            <Text style={styles.cardSubtitle}>Usia 12 - 23 Bulan</Text>
           </View>
         </View>
       </View>
@@ -123,7 +123,7 @@ const MpasiDetailScreen: React.FC<MpasiDetailScreenProps> = ({ onBack }) => {
         <View style={styles.mpasiProfileSection}>
           <View style={styles.imageContainer}>
             <Image
-              source={require('../assets/mpasi/profil-mpasi-06-08-bulan.png')}
+              source={require('../assets/mpasi/profil-mpasi-12-23-bulan.png')}
               style={styles.mpasiProfileImage}
               resizeMode="contain"
             />
@@ -345,4 +345,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MpasiDetailScreen;
+export default MpasiDetailScreen1223;
