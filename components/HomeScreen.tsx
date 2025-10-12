@@ -230,9 +230,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     },
     {
       id: 2,
-      title: 'Dadiah',
-      description: 'Makanan Pencegah Stunting',
-      image: require('../assets/home/foto-dadiah.png'),
+      title: 'Roti Tepung Komposit',
+      description: 'Produk Pangan Bergizi',
+      image: require('../assets/roti-tepung-komposit.jpeg'),
       isImage: true,
     },
   ];

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { productsData, ProductData } from '../data/productsData';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,6 +20,8 @@ interface ProductInfoScreenProps {
 }
 
 const ProductInfoScreen: React.FC<ProductInfoScreenProps> = ({ onBack }) => {
+  const [selectedProduct, setSelectedProduct] = useState<ProductData | null>(null);
+
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -30,79 +33,158 @@ const ProductInfoScreen: React.FC<ProductInfoScreenProps> = ({ onBack }) => {
     return null;
   }
 
-  // Data produk
-  const productsData = [
-    {
-      id: 1,
-      name: 'ROTI TEPUNG KOMPOSIT',
-      shelfLife: 'Masa simpan : 7 hari - suhu ruang',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder, bisa diganti dengan gambar produk
-      tag: 'Produk',
-    },
-    {
-      id: 2,
-      name: 'Vla Dadih',
-      shelfLife: 'Masa Simpan : 1 hari - suhu ruang, 3 hari - suhu lemari pendingin',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 3,
-      name: 'Healthy Cookies',
-      shelfLife: 'Masa simpan: 1 bulan - suhu ruang',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 4,
-      name: 'Puding Dadih',
-      shelfLife: 'Masa simpan : 1 hari - suhu ruang, 3 hari - suhu lemari pendingin',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 5,
-      name: 'Puding Telang',
-      shelfLife: 'Masa simpan: 1 hari - suhu ruang, 3 hari - suhu lemari pendingin',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 6,
-      name: 'Crust Pie Buah',
-      shelfLife: 'Masa simpan: 1 hari - suhu ruang, 3 hari - suhu lemari pendingin',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 7,
-      name: 'Salad Buah Vla Dadih',
-      shelfLife: 'Masa simpan: 1 hari - suhu ruang, 3 hari - suhu lemari pendingin',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-    {
-      id: 8,
-      name: 'Tepung Dadih Susu Sapi',
-      shelfLife: 'Masa simpan: 1 bulan',
-      image: require('../assets/icons/ikon-bayi.png'), // Placeholder
-      tag: 'Produk',
-    },
-  ];
+  // Menggunakan data dari file productsData.ts
+  
+  const handleProductPress = (product: ProductData) => {
+    setSelectedProduct(product);
+  };
 
-  const renderProductCard = ({ item }: { item: any }) => (
-    <View style={styles.productCard}>
+  const handleBackFromDetail = () => {
+    setSelectedProduct(null);
+  };
+
+  const renderProductCard = ({ item }: { item: ProductData }) => (
+    <TouchableOpacity style={styles.productCard} onPress={() => handleProductPress(item)}>
       <View style={styles.productImageContainer}>
+        <Image source={item.image} style={styles.productImage} resizeMode="cover" />
+      </View>
+      <View style={styles.productInfo}>
         <View style={styles.productTag}>
           <Text style={styles.productTagText}>{item.tag}</Text>
         </View>
-      </View>
-      <View style={styles.productInfo}>
         <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productShelfLife}>{item.shelfLife}</Text>
+        <Text style={styles.productShelfLife}>Masa simpan: {item.shelfLife}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+
+  // Render detail produk
+  if (selectedProduct) {
+    return (
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackFromDetail}>
+            <View style={styles.backButtonCircle}>
+              <Ionicons name="arrow-back" size={20} color="#000000" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detail Produk</Text>
+        </View>
+
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          {/* Foto Produk */}
+          <View style={styles.productDetailImageContainer}>
+            <Image source={selectedProduct.image} style={styles.productDetailImage} resizeMode="cover" />
+          </View>
+
+          {/* Nama Produk */}
+          <View style={styles.productDetailInfo}>
+            <Text style={styles.productDetailName}>{selectedProduct.name}</Text>
+            <Text style={styles.productDetailShelfLife}>Masa simpan: {selectedProduct.shelfLife}</Text>
+          </View>
+
+          {/* Komposisi */}
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>KOMPOSISI</Text>
+            {selectedProduct.composition.map((ingredient, index) => (
+              <Text key={index} style={styles.detailItem}>• {ingredient}</Text>
+            ))}
+          </View>
+
+          {/* Nilai Gizi */}
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>NILAI GIZI</Text>
+            <Text style={styles.detailSubTitle}>Takaran Saji {selectedProduct.nutrition.servingSize}</Text>
+            <Text style={styles.detailSubTitle}>{selectedProduct.nutrition.servingsPerPackage}</Text>
+            <Text style={styles.detailSubTitle}>Jumlah per sajian</Text>
+            <Text style={styles.detailItem}>Energi total: {selectedProduct.nutrition.perServing.totalEnergy}</Text>
+            <Text style={styles.detailItem}>Energi dari lemak: {selectedProduct.nutrition.perServing.energyFromFat}</Text>
+            <Text style={styles.detailItem}>Lemak total: {selectedProduct.nutrition.perServing.totalFat}</Text>
+            <Text style={styles.detailItem}>Protein: {selectedProduct.nutrition.perServing.protein}</Text>
+            <Text style={styles.detailItem}>Karbohidrat: {selectedProduct.nutrition.perServing.carbohydrate}</Text>
+          </View>
+
+          {/* Harga */}
+          <View style={styles.detailSection}>
+            <Text style={styles.detailSectionTitle}>HARGA JUAL</Text>
+            <Text style={styles.detailPrice}>{selectedProduct.price}</Text>
+          </View>
+
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNavigation}>
+          <TouchableOpacity 
+            style={styles.navItem}
+            onPress={handleBackFromDetail}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={require('../assets/icon navigasi/icon-home.png')}
+                style={styles.navIconImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navItem}
+            onPress={handleBackFromDetail}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={require('../assets/icon navigasi/icon-konten.png')}
+                style={styles.navIconImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>Konten</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navItem}
+            onPress={handleBackFromDetail}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={require('../assets/icon navigasi/icon-chat-dokter.png')}
+                style={styles.chatDoctorIcon}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>Chat Dokter</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navItem}
+            onPress={handleBackFromDetail}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={require('../assets/icon navigasi/icon-profil.png')}
+                style={styles.navIconImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>Profil</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navItem}
+            onPress={handleBackFromDetail}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={require('../assets/icon navigasi/icon-transaksi.png')}
+                style={styles.navIconImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>Transaksi</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -259,6 +341,10 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: '#E0E0E0',
   },
+  productImage: {
+    width: '100%',
+    height: '100%',
+  },
   productTag: {
     position: 'absolute',
     top: 6,
@@ -316,9 +402,92 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
   },
+  navLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    textAlign: 'center',
+  },
   chatDoctorIcon: {
     width: 40,
     height: 40,
+  },
+  // Detail Product Styles
+  productDetailImageContainer: {
+    height: 250,
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 15,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  productDetailImage: {
+    width: '100%',
+    height: '100%',
+  },
+  productDetailInfo: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginTop: -20,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  productDetailName: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  productDetailShelfLife: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+  },
+  detailSection: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginTop: 15,
+    padding: 20,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  detailSectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+    marginBottom: 15,
+  },
+  detailSubTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  detailItem: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+    marginBottom: 5,
+    lineHeight: 20,
+  },
+  detailPrice: {
+    fontSize: 24,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FF6B9D',
   },
 });
 
