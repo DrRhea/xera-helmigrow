@@ -168,6 +168,7 @@ const GrowthChartScreen: React.FC<GrowthChartScreenProps> = ({ onBack }) => {
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={styles.navIcon}>
@@ -177,6 +178,7 @@ const GrowthChartScreen: React.FC<GrowthChartScreenProps> = ({ onBack }) => {
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.navLabel}>Konten</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={styles.navIcon}>
@@ -186,6 +188,7 @@ const GrowthChartScreen: React.FC<GrowthChartScreenProps> = ({ onBack }) => {
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.navLabel}>Chat Dokter</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={styles.navIcon}>
@@ -195,6 +198,7 @@ const GrowthChartScreen: React.FC<GrowthChartScreenProps> = ({ onBack }) => {
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.navLabel}>Transaksi</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={styles.navIcon}>
@@ -204,6 +208,7 @@ const GrowthChartScreen: React.FC<GrowthChartScreenProps> = ({ onBack }) => {
               resizeMode="contain"
             />
           </View>
+          <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -383,6 +388,13 @@ const styles = StyleSheet.create({
   chatDoctorIcon: {
     width: 40,
     height: 40,
+  },
+  navLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    textAlign: 'center',
+    marginTop: 2,
   },
 });
 

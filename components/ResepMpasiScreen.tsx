@@ -143,7 +143,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
             <Ionicons
               key={index}
               name="star-outline"
-              size={12}
+              size={10}
               color="#FFD700"
               style={styles.star}
             />
@@ -235,6 +235,7 @@ const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
                 resizeMode="contain"
               />
             </View>
+            <Text style={styles.navLabel}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
   },
   cardImageContainer: {
     position: 'relative',
-    height: 120,
+    height: 100,
   },
   cardImage: {
     width: '100%',
@@ -311,35 +312,35 @@ const styles = StyleSheet.create({
   },
   badgeContainer: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    right: 8,
+    top: 6,
+    left: 6,
+    right: 6,
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 6,
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 4,
   },
   badgeText: {
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: 'Poppins_600SemiBold',
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 10,
+    lineHeight: 9,
   },
   cardContent: {
-    padding: 12,
+    padding: 10,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Poppins_600SemiBold',
     color: '#000000',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   cardSubtitle: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'Poppins_400Regular',
     color: '#666666',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -347,6 +348,7 @@ const styles = StyleSheet.create({
   },
   star: {
     marginRight: 1,
+    fontSize: 10,
   },
   bottomSpacing: {
     height: 20,
@@ -382,6 +384,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Poppins_400Regular',
     color: '#000000',
+    textAlign: 'center',
+    marginTop: 2,
   },
 });
 
