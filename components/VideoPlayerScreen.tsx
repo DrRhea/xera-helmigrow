@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 
@@ -28,6 +29,8 @@ interface VideoPlayerScreenProps {
 
 const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, videoData }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoStatus, setVideoStatus] = useState<any>({});
+  const videoRef = useRef<Video>(null);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -53,41 +56,71 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
 
   const currentVideo = videoData || defaultVideoData;
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const handlePlayPause = async () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        await videoRef.current.pauseAsync();
+      } else {
+        await videoRef.current.playAsync();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* Video Player Section */}
       <View style={styles.videoPlayerContainer}>
-        {/* Video Thumbnail/Background */}
-        <View style={styles.videoThumbnail}>
-          {/* Play Button */}
-          <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
-            <View style={styles.playButtonCircle}>
-              <Ionicons 
-                name={isPlaying ? "pause" : "play"} 
-                size={24} 
-                color="#FFFFFF" 
-              />
-            </View>
-          </TouchableOpacity>
-
-          {/* Progress Bar */}
-          <View style={styles.progressBarContainer}>
-            <View style={styles.progressBar}>
-              <View style={styles.progressBarFilled} />
-              <View style={styles.progressBarScrubber} />
-            </View>
+        <Video
+          ref={videoRef}
+          style={styles.video}
+          source={{ uri: require('../assets/manjujai/Video 2 edukasi Manjujai_Elfifa Nia.mp4') }}
+          useNativeControls={false}
+          resizeMode={ResizeMode.CONTAIN}
+          isLooping={false}
+          onPlaybackStatusUpdate={setVideoStatus}
+        />
+        
+        {/* Play/Pause Overlay */}
+        <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
+          <View style={styles.playButtonCircle}>
+            <Ionicons 
+              name={isPlaying ? "pause" : "play"} 
+              size={24} 
+              color="#FFFFFF" 
+            />
           </View>
+        </TouchableOpacity>
 
-          {/* Time Display */}
-          <View style={styles.timeDisplay}>
-            <Text style={styles.timeText}>
-              {currentVideo.currentTime} / {currentVideo.duration}
-            </Text>
+        {/* Progress Bar */}
+        <View style={styles.progressBarContainer}>
+          <View style={styles.progressBar}>
+            <View style={[
+              styles.progressBarFilled, 
+              { width: videoStatus.durationMillis ? 
+                `${(videoStatus.positionMillis / videoStatus.durationMillis) * 100}%` : '0%' 
+              }
+            ]} />
+            <View style={[
+              styles.progressBarScrubber,
+              { left: videoStatus.durationMillis ? 
+                `${(videoStatus.positionMillis / videoStatus.durationMillis) * 100}%` : '0%' 
+              }
+            ]} />
           </View>
+        </View>
+
+        {/* Time Display */}
+        <View style={styles.timeDisplay}>
+          <Text style={styles.timeText}>
+            {videoStatus.positionMillis ? 
+              `${Math.floor(videoStatus.positionMillis / 1000 / 60)}:${Math.floor((videoStatus.positionMillis / 1000) % 60).toString().padStart(2, '0')}` : 
+              '0:00'
+            } / {videoStatus.durationMillis ? 
+              `${Math.floor(videoStatus.durationMillis / 1000 / 60)}:${Math.floor((videoStatus.durationMillis / 1000) % 60).toString().padStart(2, '0')}` : 
+              currentVideo.duration
+            }
+          </Text>
         </View>
       </View>
 
@@ -176,10 +209,11 @@ const styles = StyleSheet.create({
   videoPlayerContainer: {
     height: height * 0.4, // 40% of screen height
     backgroundColor: '#2C5F5F', // Dark teal background
-  },
-  videoThumbnail: {
-    flex: 1,
     position: 'relative',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
   },
   playButton: {
     position: 'absolute',
