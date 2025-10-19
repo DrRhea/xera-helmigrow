@@ -21,6 +21,8 @@ import ChildProfileScreen from './ChildProfileScreen';
 import GrowthChartScreen from './GrowthChartScreen';
 import ProductInfoScreen from './ProductInfoScreen';
 import DiariAnakScreen from './DiariAnakScreen';
+import VideoPlayerScreen from './VideoPlayerScreen';
+import ArtikelScreen from './ArtikelScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +41,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showProductInfo, setShowProductInfo] = useState(false);
   const [showGrowthChart, setShowGrowthChart] = useState(false);
   const [showDiariAnak, setShowDiariAnak] = useState(false);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [showArtikel, setShowArtikel] = useState(false);
 
   // Data anak yang sudah ada
   const childrenData = [
@@ -154,6 +158,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowDiariAnak(false);
   };
 
+  const handleManjujaiVideo = () => {
+    setShowVideoPlayer(true);
+  };
+
+  const handleBackFromVideoPlayer = () => {
+    setShowVideoPlayer(false);
+  };
+
+  const handleArtikel = () => {
+    setShowArtikel(true);
+  };
+
+  const handleBackFromArtikel = () => {
+    setShowArtikel(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -228,6 +248,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     );
   }
 
+  if (showVideoPlayer) {
+    return (
+      <VideoPlayerScreen 
+        onBack={handleBackFromVideoPlayer}
+        onHome={handleBackFromVideoPlayer}
+        videoData={{
+          id: 1,
+          title: 'Video Edukasi Manjujai',
+          description: 'Video edukasi Manjujai oleh Elfifa Nia',
+          tag: 'Manjujai',
+          viewCount: '254x Ditonton',
+          duration: '5:00',
+          currentTime: '0:00',
+        }}
+      />
+    );
+  }
+
+  if (showArtikel) {
+    return (
+      <ArtikelScreen 
+        onBack={handleBackFromArtikel}
+      />
+    );
+  }
+
   const featureIcons = [
     { id: 1, icon: require('../assets/icons/jadwal-imunisasi.png'), label: 'Jadwal Imuninasi' },
     { id: 2, icon: require('../assets/icons/resep-mpasi.png'), label: 'Resep MPASI' },
@@ -277,6 +323,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
               handleProductInfo();
             } else if (item.id === 7) { // Diari Anak
               handleDiariAnak();
+            } else if (item.id === 5) { // Artikel
+              handleArtikel();
             }
         // Add other navigation handlers here for other icons
       }}
@@ -424,7 +472,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         </View>
 
         {/* Manjujai Banner */}
-        <TouchableOpacity onPress={handleKonten}>
+        <TouchableOpacity onPress={handleManjujaiVideo}>
           <LinearGradient
             colors={['#F267A0', '#FEF8EB']}
             start={{ x: 0, y: 0 }}
