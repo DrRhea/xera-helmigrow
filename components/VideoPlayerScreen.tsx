@@ -74,7 +74,7 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
         <Video
           ref={videoRef}
           style={styles.video}
-          source={{ uri: require('../assets/manjujai/Video 2 edukasi Manjujai_Elfifa Nia.mp4') }}
+          source={{ uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }}
           useNativeControls={false}
           resizeMode={ResizeMode.CONTAIN}
           isLooping={false}

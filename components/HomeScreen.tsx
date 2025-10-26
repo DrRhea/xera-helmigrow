@@ -23,6 +23,7 @@ import ProductInfoScreen from './ProductInfoScreen';
 import DiariAnakScreen from './DiariAnakScreen';
 import VideoPlayerScreen from './VideoPlayerScreen';
 import ArtikelScreen from './ArtikelScreen';
+import ProfileScreen from './ProfileScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showDiariAnak, setShowDiariAnak] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [showArtikel, setShowArtikel] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   // Data anak yang sudah ada
   const childrenData = [
@@ -174,6 +176,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowArtikel(false);
   };
 
+  const handleProfile = () => {
+    setShowProfile(true);
+  };
+
+  const handleBackFromProfile = () => {
+    setShowProfile(false);
+  };
+
   if (showAddChild) {
     return (
       <AddChildScreen 
@@ -270,6 +280,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     return (
       <ArtikelScreen 
         onBack={handleBackFromArtikel}
+      />
+    );
+  }
+
+  if (showProfile) {
+    return (
+      <ProfileScreen 
+        onBack={handleBackFromProfile}
+        onLogout={onLogout}
       />
     );
   }
@@ -374,7 +393,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             />
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.userButton}>
+            <TouchableOpacity style={styles.userButton} onPress={handleProfile}>
               <Ionicons name="person" size={24} color="#000000" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.notificationButton}>
@@ -552,6 +571,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 handleKonten();
               } else if (item.id === 3) { // Chat Dokter
                 handleChatDoctor();
+              } else if (item.id === 5) { // Profil
+                handleProfile();
               }
             }}
           >

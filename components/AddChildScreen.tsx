@@ -9,9 +9,12 @@ import {
   Image,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 
 const { width, height } = Dimensions.get('window');
@@ -28,6 +31,9 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
   const [birthWeight, setBirthWeight] = useState('');
   const [birthHeight, setBirthHeight] = useState('');
   const [headCircumference, setHeadCircumference] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -40,11 +46,179 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     return null;
   }
 
-  const handleSave = () => {
-    if (!fullName || !birthDate || !gender || !birthWeight || !birthHeight || !headCircumference) {
-      Alert.alert('Error', 'Mohon lengkapi semua data');
+  const pickImage = async () => {
+    // Request permission
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission Required', 'Permission to access camera roll is required!');
       return;
     }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    // Request permission
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission Required', 'Permission to access camera is required!');
+      return;
+    }
+
+    // Launch camera
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
+  const showImagePicker = () => {
+    // Langsung buka galeri tanpa alert pilihan
+    pickImage();
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+      setBirthDate(selectedDate.toLocaleDateString('id-ID'));
+    }
+  };
+
+  const showDatePickerModal = () => {
+    if (Platform.OS === 'web') {
+      // For web, create a more visible date input
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.max = new Date().toISOString().split('T')[0];
+      input.style.position = 'fixed';
+      input.style.top = '50%';
+      input.style.left = '50%';
+      input.style.transform = 'translate(-50%, -50%)';
+      input.style.zIndex = '9999';
+      input.style.fontSize = '16px';
+      input.style.fontFamily = 'Poppins, sans-serif';
+      input.style.padding = '15px 20px';
+      input.style.border = '2px solid #87CEEB';
+      input.style.borderRadius = '25px';
+      input.style.backgroundColor = '#F5F5F5';
+      input.style.color = '#000000';
+      input.style.boxShadow = '0 8px 25px rgba(135, 206, 235, 0.3)';
+      input.style.minWidth = '280px';
+      input.style.outline = 'none';
+      input.style.transition = 'all 0.3s ease';
+      input.style.transform = 'translate(-50%, -50%) scale(0.9)';
+      input.style.opacity = '0';
+      
+      // Add backdrop with app theme
+      const backdrop = document.createElement('div');
+      backdrop.style.position = 'fixed';
+      backdrop.style.top = '0';
+      backdrop.style.left = '0';
+      backdrop.style.width = '100%';
+      backdrop.style.height = '100%';
+      backdrop.style.background = 'linear-gradient(135deg, rgba(255, 250, 236, 0.9), rgba(242, 103, 160, 0.8))';
+      backdrop.style.zIndex = '9998';
+      backdrop.style.backdropFilter = 'blur(5px)';
+      
+      document.body.appendChild(backdrop);
+      document.body.appendChild(input);
+      
+      const cleanup = () => {
+        if (document.body.contains(input)) document.body.removeChild(input);
+        if (document.body.contains(backdrop)) document.body.removeChild(backdrop);
+      };
+      
+      input.onchange = (e: any) => {
+        if (e.target.value) {
+          const date = new Date(e.target.value);
+          setSelectedDate(date);
+          setBirthDate(date.toLocaleDateString('id-ID'));
+        }
+        cleanup();
+      };
+      
+      backdrop.onclick = cleanup;
+      
+      // Animate in and show calendar
+      setTimeout(() => {
+        input.style.transform = 'translate(-50%, -50%) scale(1)';
+        input.style.opacity = '1';
+        input.focus();
+        // Try to show picker, fallback to click if not supported
+        if (input.showPicker) {
+          input.showPicker();
+        } else {
+          input.click();
+        }
+      }, 50);
+    } else {
+      setShowDatePicker(true);
+    }
+  };
+
+  const handleSave = () => {
+    // Validasi field kosong
+    if (!fullName.trim()) {
+      Alert.alert('Error', 'Mohon masukkan nama lengkap');
+      return;
+    }
+    if (!birthDate) {
+      Alert.alert('Error', 'Mohon pilih tanggal lahir');
+      return;
+    }
+    if (!gender) {
+      Alert.alert('Error', 'Mohon pilih jenis kelamin');
+      return;
+    }
+    if (!birthWeight.trim()) {
+      Alert.alert('Error', 'Mohon masukkan berat badan');
+      return;
+    }
+    if (!birthHeight.trim()) {
+      Alert.alert('Error', 'Mohon masukkan tinggi badan');
+      return;
+    }
+    if (!headCircumference.trim()) {
+      Alert.alert('Error', 'Mohon masukkan lingkar kepala');
+      return;
+    }
+
+    // Validasi format numerik
+    const weight = parseFloat(birthWeight);
+    const height = parseFloat(birthHeight);
+    const headCirc = parseFloat(headCircumference);
+
+    if (isNaN(weight) || weight <= 0 || weight > 10) {
+      Alert.alert('Error', 'Berat badan harus antara 0.1 - 10 kg');
+      return;
+    }
+    if (isNaN(height) || height <= 0 || height > 100) {
+      Alert.alert('Error', 'Tinggi badan harus antara 1 - 100 cm');
+      return;
+    }
+    if (isNaN(headCirc) || headCirc <= 0 || headCirc > 50) {
+      Alert.alert('Error', 'Lingkar kepala harus antara 1 - 50 cm');
+      return;
+    }
+
     Alert.alert('Berhasil', 'Data anak berhasil disimpan!');
     onSave();
   };
@@ -75,9 +249,13 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
 
         {/* Profile Picture Placeholder */}
         <View style={styles.profileContainer}>
-          <View style={styles.profilePlaceholder}>
-            <Ionicons name="person" size={60} color="#666666" />
-          </View>
+          <TouchableOpacity style={styles.profilePlaceholder} onPress={showImagePicker}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            ) : (
+              <Ionicons name="person" size={60} color="#666666" />
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Birth Data Section */}
@@ -99,13 +277,12 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
           {/* Birth Date */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Tanggal Lahir</Text>
-            <TextInput
-              style={styles.input}
-              value={birthDate}
-              onChangeText={setBirthDate}
-              placeholder="Masukan Tanggal Lahir"
-              placeholderTextColor="#999"
-            />
+            <TouchableOpacity style={[styles.input, styles.dateInput]} onPress={showDatePickerModal}>
+              <Text style={[styles.inputText, !birthDate && styles.placeholderText]}>
+                {birthDate || 'Masukan Tanggal Lahir'}
+              </Text>
+              <Ionicons name="calendar-outline" size={20} color="#999" />
+            </TouchableOpacity>
           </View>
 
           {/* Gender */}
@@ -136,7 +313,7 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
           {/* Photo Upload */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Foto Si Kecil</Text>
-            <TouchableOpacity style={styles.uploadArea}>
+            <TouchableOpacity style={styles.uploadArea} onPress={showImagePicker}>
               <Ionicons name="add" size={24} color="#000000" />
               <Text style={styles.uploadText}>Unggah Foto</Text>
             </TouchableOpacity>
@@ -151,7 +328,7 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
               onChangeText={setBirthWeight}
               placeholder="Masukan Berat badan"
               placeholderTextColor="#999"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
           </View>
 
@@ -162,9 +339,9 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
               style={styles.input}
               value={birthHeight}
               onChangeText={setBirthHeight}
-              placeholder="Masukan Tinngi badan"
+              placeholder="Masukan Tinggi badan"
               placeholderTextColor="#999"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
           </View>
 
@@ -175,9 +352,9 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
               style={styles.input}
               value={headCircumference}
               onChangeText={setHeadCircumference}
-              placeholder="Lingakar Kepala Saat Lahir"
+              placeholder="Masukan Lingkar Kepala"
               placeholderTextColor="#999"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
           </View>
         </View>
@@ -197,6 +374,17 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Date Picker Modal - Only for mobile */}
+      {showDatePicker && Platform.OS !== 'web' && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+          maximumDate={new Date()}
+        />
+      )}
     </View>
   );
 };
@@ -256,6 +444,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
   section: {
     paddingHorizontal: 20,
   },
@@ -285,6 +478,20 @@ const styles = StyleSheet.create({
     color: '#000000',
     borderWidth: 1,
     borderColor: '#E0E0E0',
+  },
+  dateInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  inputText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    flex: 1,
+  },
+  placeholderText: {
+    color: '#999',
   },
   radioGroup: {
     flexDirection: 'row',
