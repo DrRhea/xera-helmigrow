@@ -30,13 +30,65 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const [currentHeight, setCurrentHeight] = useState('');
   const [nutritionResult, setNutritionResult] = useState<any>(null);
 
+  // Debug: Log child data received
+  console.log('👶 Child Data Received:', {
+    id: childData.id,
+    name: childData.name,
+    birth_date: childData.birth_date,
+    gender: childData.gender,
+    birthDateType: typeof childData.birth_date,
+    birthDateLength: childData.birth_date?.length
+  });
+
   // Calculate age in months
   const calculateAgeInMonths = (birthDate: string): number => {
+    console.log('🔍 Birth Date Input:', birthDate);
+    
+    // Validasi input birthDate
+    if (!birthDate || birthDate.trim() === '') {
+      console.log('❌ Birth date is empty or invalid');
+      return 0;
+    }
+    
     const birth = new Date(birthDate);
     const today = new Date();
-    const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
+    
+    // Validasi apakah Date object valid
+    if (isNaN(birth.getTime())) {
+      console.log('❌ Invalid birth date format:', birthDate);
+      return 0;
+    }
+    
+    console.log('🔍 Date Objects:', {
+      birth: birth.toISOString(),
+      today: today.toISOString(),
+      birthValid: !isNaN(birth.getTime()),
+      todayValid: !isNaN(today.getTime())
+    });
+    
+    // Perhitungan usia yang lebih akurat dengan mempertimbangkan hari
+    let ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
                        (today.getMonth() - birth.getMonth());
-    return ageInMonths;
+    
+    // Jika hari lahir belum tiba di bulan ini, kurangi 1 bulan
+    if (today.getDate() < birth.getDate()) {
+      ageInMonths--;
+    }
+    
+    console.log('🔍 Age Calculation:', {
+      birthYear: birth.getFullYear(),
+      todayYear: today.getFullYear(),
+      birthMonth: birth.getMonth(),
+      todayMonth: today.getMonth(),
+      birthDay: birth.getDate(),
+      todayDay: today.getDate(),
+      ageInMonthsBeforeAdjustment: (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth()),
+      ageInMonthsAfterAdjustment: ageInMonths,
+      finalAge: Math.min(ageInMonths, 60)
+    });
+    
+    // Batasi usia maksimal 60 bulan (5 tahun) untuk bayi
+    return Math.min(ageInMonths, 60);
   };
 
   // WHO Standards data per month (0-60 months)
@@ -299,9 +351,67 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     }
   };
 
+  // Test function to validate WHO standards data
+  const testWHOStandards = () => {
+    console.log('🧪 Testing WHO Standards Data:');
+    
+    // Test boys data
+    console.log('👦 Boys Weight Data:', {
+      length: whoStandards.boys.weight.length,
+      firstAge: whoStandards.boys.weight[0]?.age,
+      lastAge: whoStandards.boys.weight[whoStandards.boys.weight.length - 1]?.age,
+      hasAge8: !!whoStandards.boys.weight.find(d => d.age === 8)
+    });
+    
+    console.log('👦 Boys Height Data:', {
+      length: whoStandards.boys.height.length,
+      firstAge: whoStandards.boys.height[0]?.age,
+      lastAge: whoStandards.boys.height[whoStandards.boys.height.length - 1]?.age,
+      hasAge8: !!whoStandards.boys.height.find(d => d.age === 8)
+    });
+    
+    // Test girls data
+    console.log('👧 Girls Weight Data:', {
+      length: whoStandards.girls.weight.length,
+      firstAge: whoStandards.girls.weight[0]?.age,
+      lastAge: whoStandards.girls.weight[whoStandards.girls.weight.length - 1]?.age,
+      hasAge8: !!whoStandards.girls.weight.find(d => d.age === 8)
+    });
+    
+    console.log('👧 Girls Height Data:', {
+      length: whoStandards.girls.height.length,
+      firstAge: whoStandards.girls.height[0]?.age,
+      lastAge: whoStandards.girls.height[whoStandards.girls.height.length - 1]?.age,
+      hasAge8: !!whoStandards.girls.height.find(d => d.age === 8)
+    });
+    
+    // Test specific age 8 data
+    const boysAge8 = whoStandards.boys.weight.find(d => d.age === 8);
+    const girlsAge8 = whoStandards.girls.weight.find(d => d.age === 8);
+    
+    console.log('🔍 Age 8 Data:', {
+      boysAge8,
+      girlsAge8
+    });
+  };
+
+  // Call test function when component mounts
+  useEffect(() => {
+    testWHOStandards();
+  }, []);
+
   // Calculate nutrition status using WHO standards per month
   const calculateNutritionStatus = (weight: number, height: number, ageInMonths: number, gender: string) => {
     const bmi = weight / Math.pow(height / 100, 2);
+    
+    // Debug logging
+    console.log('🔍 Nutrition Assessment Debug:', {
+      weight,
+      height,
+      ageInMonths,
+      gender,
+      bmi: bmi.toFixed(2)
+    });
     
     let weightStatus = 'Normal';
     let heightStatus = 'Normal';
@@ -309,42 +419,112 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     let heightColor = '#4CAF50'; // Hijau untuk normal
     
     // Get the appropriate standards based on gender
-    const standards = gender === 'male' ? whoStandards.boys : whoStandards.girls;
+    const standards = gender === 'Laki-laki' ? whoStandards.boys : whoStandards.girls;
+    
+    // Debug: Check if standards exist
+    console.log('🔍 Standards Check:', {
+      gender,
+      hasBoysData: !!whoStandards.boys,
+      hasGirlsData: !!whoStandards.girls,
+      boysWeightLength: whoStandards.boys?.weight?.length,
+      girlsWeightLength: whoStandards.girls?.weight?.length,
+      selectedStandards: gender === 'Laki-laki' ? 'boys' : 'girls'
+    });
     
     // Find the data for the specific age
     const ageData = standards.weight.find(data => data.age === ageInMonths);
     const heightData = standards.height.find(data => data.age === ageInMonths);
     
+    console.log('📊 WHO Standards Data:', {
+      ageData,
+      heightData,
+      standardsGender: gender === 'Laki-laki' ? 'boys' : 'girls',
+      searchAge: ageInMonths,
+      availableAges: standards.weight.map(d => d.age).slice(0, 10) // Show first 10 ages
+    });
+    
     if (ageData && heightData) {
       // Determine weight status based on WHO standards
+      console.log('🔍 Weight Comparison:', {
+        weight,
+        minus3SD: ageData.minus3SD,
+        minus2SD: ageData.minus2SD,
+        median: ageData.median,
+        plus2SD: ageData.plus2SD,
+        plus3SD: ageData.plus3SD
+      });
+      
       if (weight < ageData.minus3SD) {
         weightStatus = 'Sangat Kurang';
         weightColor = '#F44336';
+        console.log('✅ Weight: Sangat Kurang');
       } else if (weight < ageData.minus2SD) {
         weightStatus = 'Kurang';
         weightColor = '#FF9800';
+        console.log('✅ Weight: Kurang');
       } else if (weight > ageData.plus3SD) {
         weightStatus = 'Berlebih';
         weightColor = '#F44336';
+        console.log('✅ Weight: Berlebih');
       } else if (weight > ageData.plus2SD) {
         weightStatus = 'Cenderung Berlebih';
         weightColor = '#FF9800';
+        console.log('✅ Weight: Cenderung Berlebih');
+      } else {
+        console.log('✅ Weight: Normal (between -2SD and +2SD)');
       }
       
       // Determine height status based on WHO standards
+      console.log('🔍 Height Comparison:', {
+        height,
+        minus3SD: heightData.minus3SD,
+        minus2SD: heightData.minus2SD,
+        median: heightData.median,
+        plus2SD: heightData.plus2SD,
+        plus3SD: heightData.plus3SD
+      });
+      
       if (height < heightData.minus3SD) {
         heightStatus = 'Sangat Pendek';
         heightColor = '#F44336';
+        console.log('✅ Height: Sangat Pendek');
       } else if (height < heightData.minus2SD) {
         heightStatus = 'Pendek';
         heightColor = '#FF9800';
+        console.log('✅ Height: Pendek');
       } else if (height > heightData.plus3SD) {
         heightStatus = 'Tinggi';
         heightColor = '#F44336';
+        console.log('✅ Height: Tinggi');
       } else if (height > heightData.plus2SD) {
         heightStatus = 'Cenderung Tinggi';
         heightColor = '#FF9800';
+        console.log('✅ Height: Cenderung Tinggi');
+      } else {
+        console.log('✅ Height: Normal (between -2SD and +2SD)');
       }
+      
+      console.log('✅ Assessment Result:', {
+        weightStatus,
+        heightStatus,
+        weightRanges: {
+          minus3SD: ageData.minus3SD,
+          minus2SD: ageData.minus2SD,
+          median: ageData.median,
+          plus2SD: ageData.plus2SD,
+          plus3SD: ageData.plus3SD
+        },
+        heightRanges: {
+          minus3SD: heightData.minus3SD,
+          minus2SD: heightData.minus2SD,
+          median: heightData.median,
+          plus2SD: heightData.plus2SD,
+          plus3SD: heightData.plus3SD
+        }
+      });
+    } else {
+      console.log('❌ No WHO standards data found for age:', ageInMonths);
+      console.log('❌ Available ages:', standards.weight.map(d => d.age));
     }
     
     return { 
@@ -366,8 +546,27 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     const height = parseFloat(currentHeight);
     const ageInMonths = calculateAgeInMonths(childData.birth_date);
 
+    console.log('🚀 Starting Nutrition Assessment:', {
+      childName: childData.name,
+      childGender: childData.gender,
+      childBirthDate: childData.birth_date,
+      inputWeight: weight,
+      inputHeight: height,
+      calculatedAgeInMonths: ageInMonths
+    });
+
     if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
       Alert.alert('Error', 'Berat badan dan tinggi badan harus berupa angka positif');
+      return;
+    }
+
+    // Validasi usia maksimal 60 bulan
+    if (ageInMonths > 60) {
+      Alert.alert(
+        'Usia Tidak Sesuai', 
+        'Sistem assessment gizi ini khusus untuk bayi dan balita hingga usia 5 tahun (60 bulan). Silakan konsultasi dengan dokter untuk anak di atas 5 tahun.',
+        [{ text: 'OK' }]
+      );
       return;
     }
 
@@ -384,6 +583,51 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const ageInMonths = calculateAgeInMonths(childData.birth_date);
   const ageYears = Math.floor(ageInMonths / 12);
   const ageMonths = ageInMonths % 12;
+  
+  // Format usia untuk display
+  const getAgeDisplay = () => {
+    if (ageInMonths === 0) {
+      return 'Usia tidak valid';
+    } else if (ageInMonths > 60) {
+      return `${ageYears} Tahun ${ageMonths} Bulan (Di atas batas usia assessment)`;
+    } else if (ageYears > 0) {
+      return `${ageYears} Tahun ${ageMonths} Bulan`;
+    } else {
+      return `${ageMonths} Bulan`;
+    }
+  };
+
+  // Jika data anak tidak valid, tampilkan error
+  if (!childData.birth_date || childData.birth_date.trim() === '') {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={['#87CEEB', '#4682B4']}
+          style={styles.header}
+        >
+          <TouchableOpacity style={styles.backButton} onPress={onBack}>
+            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Assessment Gizi</Text>
+            <Text style={styles.headerSubtitle}>Data tidak valid</Text>
+          </View>
+        </LinearGradient>
+        
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Data tanggal lahir anak tidak valid atau kosong.
+          </Text>
+          <Text style={styles.errorSubtext}>
+            Silakan periksa data anak di profil atau tambahkan data yang benar.
+          </Text>
+          <TouchableOpacity style={styles.backToProfileButton} onPress={onBack}>
+            <Text style={styles.backToProfileButtonText}>Kembali ke Profil</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -407,7 +651,7 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
           <View style={styles.childInfo}>
             <Text style={styles.childName}>{childData.name}</Text>
             <Text style={styles.childDetails}>
-              {ageYears} tahun {ageMonths} bulan • {childData.gender}
+              {getAgeDisplay()} • {childData.gender}
             </Text>
           </View>
         </View>
@@ -738,6 +982,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'System',
     color: '#666666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#F44336',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 20,
+  },
+  backToProfileButton: {
+    backgroundColor: '#87CEEB',
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  backToProfileButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

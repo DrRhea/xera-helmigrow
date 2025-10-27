@@ -21,20 +21,20 @@ interface ChildProfileScreenProps {
   childData: {
     id: number;
     name: string;
-    age: string;
-    avatar: any;
+    birth_date: string; // Ubah dari birthDate ke birth_date
     gender: string;
-    birthDate: string;
-    weight: number;
-    height: number;
-    bloodType: string;
-    allergies: string[];
-    medicalHistory: string[];
-    parentName: string;
-    parentPhone: string;
-    emergencyContact: string;
-    address: string;
-    notes: string;
+    weight?: number;
+    height?: number;
+    head_circumference?: number;
+    blood_type?: string;
+    allergies?: string[];
+    medical_history?: string[];
+    parent_name?: string;
+    parent_phone?: string;
+    emergency_contact?: string;
+    address?: string;
+    notes?: string;
+    profile_image?: string;
   };
 }
 
@@ -60,7 +60,7 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
         childData={{
           id: childData.id,
           name: childData.name,
-          birth_date: childData.birthDate,
+          birth_date: childData.birth_date, // Gunakan birth_date yang benar
           gender: childData.gender,
         }}
       />
