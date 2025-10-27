@@ -56,7 +56,7 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     
     // Perhitungan usia yang lebih akurat dengan mempertimbangkan hari
     let ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
-                     (today.getMonth() - birth.getMonth());
+                       (today.getMonth() - birth.getMonth());
     
     // Jika hari lahir belum tiba di bulan ini, kurangi 1 bulan
     if (today.getDate() < birth.getDate()) {
@@ -78,6 +78,55 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     // Batasi usia maksimal 60 bulan (5 tahun) untuk bayi
     return Math.min(ageInMonths, 60);
   };
+
+  // Test function to validate WHO standards data
+  const testWHOStandards = () => {
+    console.log('🧪 Testing WHO Standards Data:');
+    
+    // Test boys data
+    console.log('👦 Boys Weight Data:', {
+      length: whoStandards.boys.weight.length,
+      firstAge: whoStandards.boys.weight[0]?.age,
+      lastAge: whoStandards.boys.weight[whoStandards.boys.weight.length - 1]?.age,
+      hasAge8: !!whoStandards.boys.weight.find(d => d.age === 8)
+    });
+    
+    console.log('👦 Boys Height Data:', {
+      length: whoStandards.boys.height.length,
+      firstAge: whoStandards.boys.height[0]?.age,
+      lastAge: whoStandards.boys.height[whoStandards.boys.height.length - 1]?.age,
+      hasAge8: !!whoStandards.boys.height.find(d => d.age === 8)
+    });
+    
+    // Test girls data
+    console.log('👧 Girls Weight Data:', {
+      length: whoStandards.girls.weight.length,
+      firstAge: whoStandards.girls.weight[0]?.age,
+      lastAge: whoStandards.girls.weight[whoStandards.girls.weight.length - 1]?.age,
+      hasAge8: !!whoStandards.girls.weight.find(d => d.age === 8)
+    });
+    
+    console.log('👧 Girls Height Data:', {
+      length: whoStandards.girls.height.length,
+      firstAge: whoStandards.girls.height[0]?.age,
+      lastAge: whoStandards.girls.height[whoStandards.girls.height.length - 1]?.age,
+      hasAge8: !!whoStandards.girls.height.find(d => d.age === 8)
+    });
+    
+    // Test specific age 8 data
+    const boysAge8 = whoStandards.boys.weight.find(d => d.age === 8);
+    const girlsAge8 = whoStandards.girls.weight.find(d => d.age === 8);
+    
+    console.log('🔍 Age 8 Data:', {
+      boysAge8,
+      girlsAge8
+    });
+  };
+
+  // Call test function when component mounts
+  useEffect(() => {
+    testWHOStandards();
+  }, []);
 
   // WHO Standards data per month (0-60 months)
   const whoStandards = {
