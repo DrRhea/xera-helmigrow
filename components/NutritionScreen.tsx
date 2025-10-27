@@ -44,8 +44,20 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const calculateAgeInMonths = (birthDate: string): number => {
     console.log('🔍 Birth Date Input:', birthDate);
     
+    // Validasi input birthDate
+    if (!birthDate || birthDate.trim() === '') {
+      console.log('❌ Birth date is empty or invalid');
+      return 0;
+    }
+    
     const birth = new Date(birthDate);
     const today = new Date();
+    
+    // Validasi apakah Date object valid
+    if (isNaN(birth.getTime())) {
+      console.log('❌ Invalid birth date format:', birthDate);
+      return 0;
+    }
     
     console.log('🔍 Date Objects:', {
       birth: birth.toISOString(),
@@ -574,7 +586,9 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   
   // Format usia untuk display
   const getAgeDisplay = () => {
-    if (ageInMonths > 60) {
+    if (ageInMonths === 0) {
+      return 'Usia tidak valid';
+    } else if (ageInMonths > 60) {
       return `${ageYears} Tahun ${ageMonths} Bulan (Di atas batas usia assessment)`;
     } else if (ageYears > 0) {
       return `${ageYears} Tahun ${ageMonths} Bulan`;
@@ -582,6 +596,38 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
       return `${ageMonths} Bulan`;
     }
   };
+
+  // Jika data anak tidak valid, tampilkan error
+  if (!childData.birth_date || childData.birth_date.trim() === '') {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={['#87CEEB', '#4682B4']}
+          style={styles.header}
+        >
+          <TouchableOpacity style={styles.backButton} onPress={onBack}>
+            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Assessment Gizi</Text>
+            <Text style={styles.headerSubtitle}>Data tidak valid</Text>
+          </View>
+        </LinearGradient>
+        
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Data tanggal lahir anak tidak valid atau kosong.
+          </Text>
+          <Text style={styles.errorSubtext}>
+            Silakan periksa data anak di profil atau tambahkan data yang benar.
+          </Text>
+          <TouchableOpacity style={styles.backToProfileButton} onPress={onBack}>
+            <Text style={styles.backToProfileButtonText}>Kembali ke Profil</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -936,6 +982,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'System',
     color: '#666666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#F44336',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 20,
+  },
+  backToProfileButton: {
+    backgroundColor: '#87CEEB',
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  backToProfileButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
