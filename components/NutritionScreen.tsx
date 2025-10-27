@@ -30,12 +30,50 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const [currentHeight, setCurrentHeight] = useState('');
   const [nutritionResult, setNutritionResult] = useState<any>(null);
 
+  // Debug: Log child data received
+  console.log('👶 Child Data Received:', {
+    id: childData.id,
+    name: childData.name,
+    birth_date: childData.birth_date,
+    gender: childData.gender,
+    birthDateType: typeof childData.birth_date,
+    birthDateLength: childData.birth_date?.length
+  });
+
   // Calculate age in months
   const calculateAgeInMonths = (birthDate: string): number => {
+    console.log('🔍 Birth Date Input:', birthDate);
+    
     const birth = new Date(birthDate);
     const today = new Date();
-    const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
-                       (today.getMonth() - birth.getMonth());
+    
+    console.log('🔍 Date Objects:', {
+      birth: birth.toISOString(),
+      today: today.toISOString(),
+      birthValid: !isNaN(birth.getTime()),
+      todayValid: !isNaN(today.getTime())
+    });
+    
+    // Perhitungan usia yang lebih akurat dengan mempertimbangkan hari
+    let ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
+                     (today.getMonth() - birth.getMonth());
+    
+    // Jika hari lahir belum tiba di bulan ini, kurangi 1 bulan
+    if (today.getDate() < birth.getDate()) {
+      ageInMonths--;
+    }
+    
+    console.log('🔍 Age Calculation:', {
+      birthYear: birth.getFullYear(),
+      todayYear: today.getFullYear(),
+      birthMonth: birth.getMonth(),
+      todayMonth: today.getMonth(),
+      birthDay: birth.getDate(),
+      todayDay: today.getDate(),
+      ageInMonthsBeforeAdjustment: (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth()),
+      ageInMonthsAfterAdjustment: ageInMonths,
+      finalAge: Math.min(ageInMonths, 60)
+    });
     
     // Batasi usia maksimal 60 bulan (5 tahun) untuk bayi
     return Math.min(ageInMonths, 60);
@@ -322,10 +360,11 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     // Get the appropriate standards based on gender
     const standards = gender === 'Laki-laki' ? whoStandards.boys : whoStandards.girls;
     
-    // Debug: Check if standards exist and have data
-    console.log('📊 Standards Check:', {
-      hasBoys: !!whoStandards.boys,
-      hasGirls: !!whoStandards.girls,
+    // Debug: Check if standards exist
+    console.log('🔍 Standards Check:', {
+      gender,
+      hasBoysData: !!whoStandards.boys,
+      hasGirlsData: !!whoStandards.girls,
       boysWeightLength: whoStandards.boys?.weight?.length,
       girlsWeightLength: whoStandards.girls?.weight?.length,
       selectedStandards: gender === 'Laki-laki' ? 'boys' : 'girls'
@@ -339,16 +378,8 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
       ageData,
       heightData,
       standardsGender: gender === 'Laki-laki' ? 'boys' : 'girls',
-      foundAgeData: !!ageData,
-      foundHeightData: !!heightData
-    });
-    
-    // Debug: Check first few ages to see if data is different
-    console.log('🔍 Sample Age Data Check:', {
-      age0: standards.weight.find(data => data.age === 0),
-      age8: standards.weight.find(data => data.age === 8),
-      age12: standards.weight.find(data => data.age === 12),
-      age24: standards.weight.find(data => data.age === 24)
+      searchAge: ageInMonths,
+      availableAges: standards.weight.map(d => d.age).slice(0, 10) // Show first 10 ages
     });
     
     if (ageData && heightData) {
@@ -432,8 +463,7 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
       });
     } else {
       console.log('❌ No WHO standards data found for age:', ageInMonths);
-      console.log('❌ Available ages in weight data:', standards.weight.map(d => d.age));
-      console.log('❌ Available ages in height data:', standards.height.map(d => d.age));
+      console.log('❌ Available ages:', standards.weight.map(d => d.age));
     }
     
     return { 
@@ -454,6 +484,15 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     const weight = parseFloat(currentWeight);
     const height = parseFloat(currentHeight);
     const ageInMonths = calculateAgeInMonths(childData.birth_date);
+
+    console.log('🚀 Starting Nutrition Assessment:', {
+      childName: childData.name,
+      childGender: childData.gender,
+      childBirthDate: childData.birth_date,
+      inputWeight: weight,
+      inputHeight: height,
+      calculatedAgeInMonths: ageInMonths
+    });
 
     if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
       Alert.alert('Error', 'Berat badan dan tinggi badan harus berupa angka positif');
