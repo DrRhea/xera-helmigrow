@@ -23,7 +23,8 @@ interface VideoPlayerScreenProps {
     tag: string;
     viewCount: string;
     duration: string;
-    currentTime: string;
+    videoSource: any;
+    thumbnail: any;
   };
 }
 
@@ -46,12 +47,13 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
   // Default video data if none provided
   const defaultVideoData = {
     id: 1,
-    title: 'Exampel vidio tumbuh kembang anak',
+    title: 'Video Edukasi Manjujai',
     description: 'Video edukasi untuk stimulasi tumbuh kembang anak',
-    tag: 'Xampel',
+    tag: 'Manjujai',
     viewCount: '254x Ditonton',
     duration: '5:00',
-    currentTime: '0:48',
+    videoSource: require('../assets/konten-manjujai/cari-mainan.mp4'),
+    thumbnail: require('../assets/icons/manjujai.png'),
   };
 
   const currentVideo = videoData || defaultVideoData;
@@ -74,7 +76,7 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
         <Video
           ref={videoRef}
           style={styles.video}
-          source={{ uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }}
+          source={currentVideo.videoSource}
           useNativeControls={false}
           resizeMode={ResizeMode.CONTAIN}
           isLooping={false}

@@ -47,10 +47,73 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
   const contentData = [
     {
       id: 1,
-      title: 'Video Edukasi Manjujai',
-      description: 'Video edukasi Manjujai oleh Elfifa Nia',
-      tag: 'Manjujai',
-      viewCount: '254x Ditonton',
+      title: 'Cari Mainan',
+      description: 'Video edukasi untuk stimulasi motorik halus dan koordinasi mata-tangan',
+      tag: 'Motorik Halus',
+      viewCount: '1.2k Ditonton',
+      duration: '3:45',
+      videoSource: require('../assets/konten-manjujai/cari-mainan.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 2,
+      title: 'Ciluk Ba',
+      description: 'Permainan tradisional untuk stimulasi sosial dan emosional anak',
+      tag: 'Sosial Emosional',
+      viewCount: '856 Ditonton',
+      duration: '2:30',
+      videoSource: require('../assets/konten-manjujai/ciluk-ba.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 3,
+      title: 'Nyanyian Tidur',
+      description: 'Lagu pengantar tidur untuk menenangkan dan membantu anak tidur',
+      tag: 'Pengasuhan',
+      viewCount: '2.1k Ditonton',
+      duration: '4:15',
+      videoSource: require('../assets/konten-manjujai/nyanyian-tidur.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 4,
+      title: 'Stimulasi Bahasa',
+      description: 'Teknik untuk mengembangkan kemampuan bahasa dan komunikasi anak',
+      tag: 'Bahasa',
+      viewCount: '1.8k Ditonton',
+      duration: '5:20',
+      videoSource: require('../assets/konten-manjujai/stimulasi-bahasa.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 5,
+      title: 'Stimulasi Berdiri',
+      description: 'Latihan untuk membantu anak belajar berdiri dan berjalan',
+      tag: 'Motorik Kasar',
+      viewCount: '1.5k Ditonton',
+      duration: '3:55',
+      videoSource: require('../assets/konten-manjujai/stimulasi-berdiri.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 6,
+      title: 'Tangkap Bola Motorik',
+      description: 'Permainan untuk melatih koordinasi dan refleks anak',
+      tag: 'Motorik Kasar',
+      viewCount: '1.3k Ditonton',
+      duration: '4:10',
+      videoSource: require('../assets/konten-manjujai/tangkap-bola-motorik.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
+    },
+    {
+      id: 7,
+      title: 'Tapuakambaiambai',
+      description: 'Permainan tradisional Minangkabau untuk stimulasi ritme dan koordinasi',
+      tag: 'Budaya',
+      viewCount: '967 Ditonton',
+      duration: '3:25',
+      videoSource: require('../assets/konten-manjujai/tapuakambaiambai.mp4'),
+      thumbnail: require('../assets/icons/manjujai.png'),
     },
   ];
 
@@ -60,8 +123,12 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
       onPress={() => handleVideoPress(item)}
     >
       <View style={styles.cardImageContainer}>
-        <View style={styles.videoPlaceholder}>
+        <Image source={item.thumbnail} style={styles.videoThumbnail} />
+        <View style={styles.playOverlay}>
           <Ionicons name="play-circle" size={32} color="#FF6B9D" />
+        </View>
+        <View style={styles.durationBadge}>
+          <Text style={styles.durationText}>{item.duration}</Text>
         </View>
       </View>
       <View style={styles.cardContent}>
@@ -241,13 +308,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     marginRight: 12,
+    position: 'relative',
   },
-  videoPlaceholder: {
+  videoThumbnail: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#E0E0E0',
+    resizeMode: 'cover',
+  },
+  playOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  durationBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  durationText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Poppins_500Medium',
   },
   cardContent: {
     flex: 1,
