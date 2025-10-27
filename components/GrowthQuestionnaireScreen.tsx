@@ -55,7 +55,24 @@ const GrowthQuestionnaireScreen: React.FC<GrowthQuestionnaireScreenProps> = ({ o
     const today = new Date();
     const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                        (today.getMonth() - birthDate.getMonth());
-    return ageInMonths;
+    
+    // Batasi usia maksimal 60 bulan (5 tahun) untuk bayi
+    return Math.min(ageInMonths, 60);
+  };
+
+  // Format usia untuk display
+  const getAgeDisplay = () => {
+    const ageInMonths = calculateAgeInMonths();
+    const ageYears = Math.floor(ageInMonths / 12);
+    const ageMonths = ageInMonths % 12;
+    
+    if (ageInMonths > 60) {
+      return `${ageYears} Tahun ${ageMonths} Bulan (Di atas batas usia assessment)`;
+    } else if (ageYears > 0) {
+      return `${ageYears} Tahun ${ageMonths} Bulan`;
+    } else {
+      return `${ageMonths} Bulan`;
+    }
   };
 
   // Load questions based on child's age
@@ -67,6 +84,16 @@ const GrowthQuestionnaireScreen: React.FC<GrowthQuestionnaireScreenProps> = ({ o
     try {
       setIsLoading(true);
       const ageInMonths = calculateAgeInMonths();
+      
+      // Validasi usia maksimal 60 bulan
+      if (ageInMonths > 60) {
+        Alert.alert(
+          'Usia Tidak Sesuai', 
+          'Sistem kuesioner tumbuh kembang ini khusus untuk bayi dan balita hingga usia 5 tahun (60 bulan). Silakan konsultasi dengan dokter untuk anak di atas 5 tahun.',
+          [{ text: 'OK', onPress: () => onBack() }]
+        );
+        return;
+      }
       
       // Determine which questionnaire to load based on age
       let questionnaireData: Question[] = [];
@@ -89,8 +116,6 @@ const GrowthQuestionnaireScreen: React.FC<GrowthQuestionnaireScreenProps> = ({ o
         questionnaireData = getQuestionsFor37To48Months();
       } else if (ageInMonths >= 49 && ageInMonths <= 60) {
         questionnaireData = getQuestionsFor49To60Months();
-      } else if (ageInMonths >= 61) {
-        questionnaireData = getQuestionsFor60PlusMonths();
       } else {
         questionnaireData = getQuestionsFor0To3Months(); // Default fallback
       }
@@ -930,7 +955,7 @@ const GrowthQuestionnaireScreen: React.FC<GrowthQuestionnaireScreenProps> = ({ o
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Kuesioner Tumbuh Kembang</Text>
-          <Text style={styles.headerSubtitle}>{childData.name} - {ageInMonths} bulan</Text>
+          <Text style={styles.headerSubtitle}>{childData.name} - {getAgeDisplay()}</Text>
         </View>
       </LinearGradient>
 

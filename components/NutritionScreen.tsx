@@ -36,7 +36,9 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     const today = new Date();
     const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
                        (today.getMonth() - birth.getMonth());
-    return ageInMonths;
+    
+    // Batasi usia maksimal 60 bulan (5 tahun) untuk bayi
+    return Math.min(ageInMonths, 60);
   };
 
   // WHO Standards data per month (0-60 months)
@@ -371,6 +373,16 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
       return;
     }
 
+    // Validasi usia maksimal 60 bulan
+    if (ageInMonths > 60) {
+      Alert.alert(
+        'Usia Tidak Sesuai', 
+        'Sistem assessment gizi ini khusus untuk bayi dan balita hingga usia 5 tahun (60 bulan). Silakan konsultasi dengan dokter untuk anak di atas 5 tahun.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     const result = calculateNutritionStatus(weight, height, ageInMonths, childData.gender);
     setNutritionResult(result);
     
@@ -384,6 +396,17 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const ageInMonths = calculateAgeInMonths(childData.birth_date);
   const ageYears = Math.floor(ageInMonths / 12);
   const ageMonths = ageInMonths % 12;
+  
+  // Format usia untuk display
+  const getAgeDisplay = () => {
+    if (ageInMonths > 60) {
+      return `${ageYears} Tahun ${ageMonths} Bulan (Di atas batas usia assessment)`;
+    } else if (ageYears > 0) {
+      return `${ageYears} Tahun ${ageMonths} Bulan`;
+    } else {
+      return `${ageMonths} Bulan`;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -407,7 +430,7 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
           <View style={styles.childInfo}>
             <Text style={styles.childName}>{childData.name}</Text>
             <Text style={styles.childDetails}>
-              {ageYears} tahun {ageMonths} bulan • {childData.gender}
+              {getAgeDisplay()} • {childData.gender}
             </Text>
           </View>
         </View>
