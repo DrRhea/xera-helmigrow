@@ -322,6 +322,15 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     // Get the appropriate standards based on gender
     const standards = gender === 'Laki-laki' ? whoStandards.boys : whoStandards.girls;
     
+    // Debug: Check if standards exist and have data
+    console.log('📊 Standards Check:', {
+      hasBoys: !!whoStandards.boys,
+      hasGirls: !!whoStandards.girls,
+      boysWeightLength: whoStandards.boys?.weight?.length,
+      girlsWeightLength: whoStandards.girls?.weight?.length,
+      selectedStandards: gender === 'Laki-laki' ? 'boys' : 'girls'
+    });
+    
     // Find the data for the specific age
     const ageData = standards.weight.find(data => data.age === ageInMonths);
     const heightData = standards.height.find(data => data.age === ageInMonths);
@@ -329,7 +338,17 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
     console.log('📊 WHO Standards Data:', {
       ageData,
       heightData,
-      standardsGender: gender === 'Laki-laki' ? 'boys' : 'girls'
+      standardsGender: gender === 'Laki-laki' ? 'boys' : 'girls',
+      foundAgeData: !!ageData,
+      foundHeightData: !!heightData
+    });
+    
+    // Debug: Check first few ages to see if data is different
+    console.log('🔍 Sample Age Data Check:', {
+      age0: standards.weight.find(data => data.age === 0),
+      age8: standards.weight.find(data => data.age === 8),
+      age12: standards.weight.find(data => data.age === 12),
+      age24: standards.weight.find(data => data.age === 24)
     });
     
     if (ageData && heightData) {
@@ -413,6 +432,8 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
       });
     } else {
       console.log('❌ No WHO standards data found for age:', ageInMonths);
+      console.log('❌ Available ages in weight data:', standards.weight.map(d => d.age));
+      console.log('❌ Available ages in height data:', standards.height.map(d => d.age));
     }
     
     return { 
