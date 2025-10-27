@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import NutritionScreen from './NutritionScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +40,7 @@ interface ChildProfileScreenProps {
 
 const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childData }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showNutrition, setShowNutrition] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -49,6 +51,20 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
 
   if (!fontsLoaded) {
     return null;
+  }
+
+  if (showNutrition) {
+    return (
+      <NutritionScreen 
+        onBack={() => setShowNutrition(false)}
+        childData={{
+          id: childData.id,
+          name: childData.name,
+          birth_date: childData.birthDate,
+          gender: childData.gender,
+        }}
+      />
+    );
   }
 
   // Data carousel gambar anak
@@ -120,6 +136,16 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
       color: '#4CAF50',
       onPress: () => {
         // Navigate to diary plan
+      },
+    },
+    {
+      id: 4,
+      title: 'Status Gizi',
+      subtitle: 'Anak',
+      icon: 'nutrition',
+      color: '#FF9800',
+      onPress: () => {
+        setShowNutrition(true);
       },
     },
   ];

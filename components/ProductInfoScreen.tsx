@@ -417,13 +417,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-  navLabel: {
-    fontSize: 10,
-    fontFamily: 'Poppins_400Regular',
-    color: '#000000',
-    textAlign: 'center',
-    marginTop: 2,
-  },
   // Detail Product Styles
   productDetailImageContainer: {
     height: 250,

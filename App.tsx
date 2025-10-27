@@ -34,6 +34,7 @@ export default function App() {
   };
 
   const handleLoginSuccess = () => {
+    console.log('🏠 Navigating to HomeScreen...');
     setCurrentScreen('home');
   };
 

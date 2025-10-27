@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -24,6 +25,11 @@ import DiariAnakScreen from './DiariAnakScreen';
 import VideoPlayerScreen from './VideoPlayerScreen';
 import ArtikelScreen from './ArtikelScreen';
 import ProfileScreen from './ProfileScreen';
+import GrowthQuestionnaireScreen from './GrowthQuestionnaireScreen';
+import ChildSelectionScreen from './ChildSelectionScreen';
+// import NutritionScreen from './NutritionScreen';
+import childrenService, { Child } from '../services/childrenService';
+import authService from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,30 +51,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [showArtikel, setShowArtikel] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showGrowthQuestionnaire, setShowGrowthQuestionnaire] = useState(false);
+  const [showChildSelection, setShowChildSelection] = useState(false);
+  // const [showNutrition, setShowNutrition] = useState(false);
 
-  // Data anak yang sudah ada
-  const childrenData = [
-    {
-      id: 1,
-      name: 'Anak 1',
-      age: '9 Tahun 0 Bulan',
-      avatar: require('../assets/icons/ikon-bayi.png'),
-      gender: 'Laki-laki',
-      birthDate: '2015-01-15',
-      weight: 28.5,
-      height: 125.0,
-      bloodType: 'O+',
-      allergies: ['Susu sapi'],
-      medicalHistory: ['Imunisasi lengkap'],
-      parentName: 'Febrinaldo',
-      parentPhone: '+6281234567890',
-      emergencyContact: '+6281234567891',
-      address: 'Jl. Contoh No. 123, Jakarta',
-      notes: 'Anak yang aktif dan sehat'
-    }
-  ];
+  // State untuk data anak dari API
+  const [childrenData, setChildrenData] = useState<Child[]>([]);
+  const [isLoadingChildren, setIsLoadingChildren] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // State untuk data user
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   const hasChildren = childrenData.length > 0;
+
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return 'Selamat pagi';
+    } else if (hour >= 12 && hour < 15) {
+      return 'Selamat siang';
+    } else if (hour >= 15 && hour < 18) {
+      return 'Selamat sore';
+    } else {
+      return 'Selamat malam';
+    }
+  };
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -76,6 +86,39 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     Poppins_600SemiBold,
     Poppins_700Bold,
   });
+
+  // Load data from API
+  useEffect(() => {
+    loadUserData();
+    loadChildren();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      setIsLoadingUser(true);
+      const user = await authService.getCurrentUser();
+      setUserData(user);
+    } catch (err: any) {
+      console.error('Failed to load user data:', err);
+      // Don't set error for user data, just use default
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
+
+  const loadChildren = async () => {
+    try {
+      setIsLoadingChildren(true);
+      setError(null);
+      const children = await childrenService.getChildren();
+      setChildrenData(children);
+    } catch (err: any) {
+      console.error('Failed to load children:', err);
+      setError(err.message || 'Gagal memuat data anak');
+    } finally {
+      setIsLoadingChildren(false);
+    }
+  };
 
   if (!fontsLoaded) {
     return null;
@@ -89,9 +132,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setShowAddChild(false);
   };
 
-  const handleSaveChild = () => {
+  const handleSaveChild = async () => {
     setShowAddChild(false);
-    // Here you can add logic to save the child data
+    // Reload children data after adding new child
+    await loadChildren();
   };
 
   const handleImunisasi = () => {
@@ -183,6 +227,53 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   const handleBackFromProfile = () => {
     setShowProfile(false);
   };
+
+  const handleGrowthQuestionnaire = (child: Child) => {
+    setSelectedChild(child);
+    setShowGrowthQuestionnaire(true);
+  };
+
+  const handleBackFromGrowthQuestionnaire = () => {
+    setShowGrowthQuestionnaire(false);
+    setSelectedChild(null);
+  };
+
+  const handleTumbuhKembang = () => {
+    if (childrenData.length === 0) {
+      // Tidak ada anak, tidak bisa melakukan kuesioner
+      return;
+    } else if (childrenData.length === 1) {
+      // Hanya 1 anak, langsung buka kuesioner
+      setSelectedChild(childrenData[0]);
+      setShowGrowthQuestionnaire(true);
+    } else {
+      // Lebih dari 1 anak, tampilkan pilihan anak
+      setShowChildSelection(true);
+    }
+  };
+
+  const handleBackFromChildSelection = () => {
+    setShowChildSelection(false);
+  };
+
+  // const handleNutrition = () => {
+  //   if (childrenData.length === 0) {
+  //     // Tidak ada anak, tidak bisa melihat status gizi
+  //     return;
+  //   } else if (childrenData.length === 1) {
+  //     // Hanya 1 anak, langsung buka status gizi
+  //     setSelectedChild(childrenData[0]);
+  //     setShowNutrition(true);
+  //   } else {
+  //     // Lebih dari 1 anak, tampilkan pilihan anak
+  //     setShowChildSelection(true);
+  //   }
+  // };
+
+  // const handleBackFromNutrition = () => {
+  //   setShowNutrition(false);
+  //   setSelectedChild(null);
+  // };
 
   if (showAddChild) {
     return (
@@ -293,6 +384,43 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     );
   }
 
+  if (showGrowthQuestionnaire && selectedChild) {
+    return (
+      <GrowthQuestionnaireScreen 
+        onBack={handleBackFromGrowthQuestionnaire}
+        childData={selectedChild}
+      />
+    );
+  }
+
+  // if (showNutrition && selectedChild) {
+  //   return (
+  //     <NutritionScreen 
+  //       onBack={handleBackFromNutrition}
+  //       childData={selectedChild}
+  //     />
+  //   );
+  // }
+
+  if (showChildSelection) {
+    return (
+      <ChildSelectionScreen 
+        onBack={handleBackFromChildSelection}
+        children={childrenData}
+        onSelectChild={(child) => {
+          setSelectedChild(child);
+          setShowChildSelection(false);
+          setShowGrowthQuestionnaire(true);
+        }}
+        // onSelectChildForNutrition={(child) => {
+        //   setSelectedChild(child);
+        //   setShowChildSelection(false);
+        //   setShowNutrition(true);
+        // }}
+      />
+    );
+  }
+
   const featureIcons = [
     { id: 1, icon: require('../assets/icons/jadwal-imunisasi.png'), label: 'Jadwal Imuninasi' },
     { id: 2, icon: require('../assets/icons/resep-mpasi.png'), label: 'Resep MPASI' },
@@ -301,6 +429,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     { id: 5, icon: require('../assets/icons/artikel.png'), label: 'Artikel' },
     { id: 6, icon: require('../assets/icons/info-produk.png'), label: 'Info Produk' },
     { id: 7, icon: require('../assets/icons/diari-anak.png'), label: 'Diari Anak' },
+        // { id: 8, icon: require('../assets/icons/nutrition.png'), label: 'Status Gizi' },
   ];
 
   const contentCards = [
@@ -336,15 +465,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
           handleImunisasi();
         } else if (item.id === 2) { // Resep MPASI
           handleResepMpasi();
-            } else if (item.id === 3) { // Grafik Tumbuhi
-              handleGrowthChart();
-            } else if (item.id === 6) { // Info Produk
-              handleProductInfo();
-            } else if (item.id === 7) { // Diari Anak
-              handleDiariAnak();
-            } else if (item.id === 5) { // Artikel
-              handleArtikel();
-            }
+        } else if (item.id === 3) { // Grafik Tumbuhi
+          handleGrowthChart();
+        } else if (item.id === 4) { // Tahap Kembang
+          handleTumbuhKembang();
+        } else if (item.id === 6) { // Info Produk
+          handleProductInfo();
+        } else if (item.id === 7) { // Diari Anak
+          handleDiariAnak();
+        } else if (item.id === 5) { // Artikel
+          handleArtikel();
+        }
+        // } else if (item.id === 8) { // Status Gizi
+        //   handleNutrition();
         // Add other navigation handlers here for other icons
       }}
     >
@@ -406,34 +539,77 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         </View>
 
         {/* Greeting */}
-        <Text style={styles.greeting}>Hai Febrinaldo</Text>
+        <Text style={styles.greeting}>
+          {isLoadingUser 
+            ? 'Hai...' 
+            : userData 
+              ? `${getTimeBasedGreeting()} ${userData.name}` 
+              : 'Hai'
+          }
+        </Text>
 
         {/* Child Profile Section */}
         <View style={styles.sectionTitle}>
           <Text style={styles.sectionTitleText}>Profil Anak</Text>
         </View>
 
-        {hasChildren ? (
+        {isLoadingChildren ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#87CEEB" />
+            <Text style={styles.loadingText}>Memuat data anak...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={loadChildren}>
+              <Text style={styles.retryButtonText}>Coba Lagi</Text>
+            </TouchableOpacity>
+          </View>
+        ) : hasChildren ? (
           <View style={styles.childrenContainer}>
-            {childrenData.map((child) => (
-              <TouchableOpacity 
-                key={child.id} 
-                style={styles.childCard}
-                onPress={() => handleChildProfile(child)}
-              >
-                <View style={styles.childAvatarContainer}>
-                  <Image
-                    source={child.avatar}
-                    style={styles.childAvatar}
-                    resizeMode="contain"
-                  />
+            {childrenData.map((child) => {
+              // Calculate age from birth_date
+              const birthDate = new Date(child.birth_date);
+              const today = new Date();
+              const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
+                                 (today.getMonth() - birthDate.getMonth());
+              const years = Math.floor(ageInMonths / 12);
+              const months = ageInMonths % 12;
+              const ageText = years > 0 ? `${years} Tahun ${months} Bulan` : `${months} Bulan`;
+
+              return (
+                <View key={child.id} style={styles.childCardContainer}>
+                  <TouchableOpacity 
+                    style={styles.childCard}
+                    onPress={() => handleChildProfile(child)}
+                  >
+                    <View style={styles.childAvatarContainer}>
+                      {child.profile_image ? (
+                        <Image
+                          source={{ 
+                            uri: child.profile_image.startsWith('data:') 
+                              ? child.profile_image 
+                              : child.profile_image 
+                          }}
+                          style={styles.childAvatar}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Image
+                          source={require('../assets/icons/ikon-bayi.png')}
+                          style={styles.childAvatar}
+                          resizeMode="contain"
+                        />
+                      )}
+                    </View>
+                    <View style={styles.childInfo}>
+                      <Text style={styles.childName}>{child.name}</Text>
+                      <Text style={styles.childAge}>{ageText}</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.childInfo}>
-                  <Text style={styles.childName}>{child.name}</Text>
-                  <Text style={styles.childAge}>{child.age}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+              );
+            })}
             <TouchableOpacity style={styles.addChildCard} onPress={handleAddChild}>
               <View style={styles.addChildIconContainer}>
                 <Ionicons name="add" size={32} color="#FF6B9D" />
@@ -696,6 +872,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 24,
     gap: 12,
+  },
+  childCardContainer: {
+    flex: 1,
+    marginBottom: 15,
   },
   childCard: {
     backgroundColor: '#FFFFFF',
@@ -985,6 +1165,40 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 100,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666',
+    marginTop: 10,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_500Medium',
+    color: '#FF6B6B',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  retryButton: {
+    backgroundColor: '#87CEEB',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFFFFF',
   },
   bottomNavigation: {
     position: 'absolute',
