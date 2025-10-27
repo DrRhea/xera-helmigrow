@@ -305,48 +305,114 @@ const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) 
   const calculateNutritionStatus = (weight: number, height: number, ageInMonths: number, gender: string) => {
     const bmi = weight / Math.pow(height / 100, 2);
     
+    // Debug logging
+    console.log('🔍 Nutrition Assessment Debug:', {
+      weight,
+      height,
+      ageInMonths,
+      gender,
+      bmi: bmi.toFixed(2)
+    });
+    
     let weightStatus = 'Normal';
     let heightStatus = 'Normal';
     let weightColor = '#4CAF50'; // Hijau untuk normal
     let heightColor = '#4CAF50'; // Hijau untuk normal
     
     // Get the appropriate standards based on gender
-    const standards = gender === 'male' ? whoStandards.boys : whoStandards.girls;
+    const standards = gender === 'Laki-laki' ? whoStandards.boys : whoStandards.girls;
     
     // Find the data for the specific age
     const ageData = standards.weight.find(data => data.age === ageInMonths);
     const heightData = standards.height.find(data => data.age === ageInMonths);
     
+    console.log('📊 WHO Standards Data:', {
+      ageData,
+      heightData,
+      standardsGender: gender === 'Laki-laki' ? 'boys' : 'girls'
+    });
+    
     if (ageData && heightData) {
       // Determine weight status based on WHO standards
+      console.log('🔍 Weight Comparison:', {
+        weight,
+        minus3SD: ageData.minus3SD,
+        minus2SD: ageData.minus2SD,
+        median: ageData.median,
+        plus2SD: ageData.plus2SD,
+        plus3SD: ageData.plus3SD
+      });
+      
       if (weight < ageData.minus3SD) {
         weightStatus = 'Sangat Kurang';
         weightColor = '#F44336';
+        console.log('✅ Weight: Sangat Kurang');
       } else if (weight < ageData.minus2SD) {
         weightStatus = 'Kurang';
         weightColor = '#FF9800';
+        console.log('✅ Weight: Kurang');
       } else if (weight > ageData.plus3SD) {
         weightStatus = 'Berlebih';
         weightColor = '#F44336';
+        console.log('✅ Weight: Berlebih');
       } else if (weight > ageData.plus2SD) {
         weightStatus = 'Cenderung Berlebih';
         weightColor = '#FF9800';
+        console.log('✅ Weight: Cenderung Berlebih');
+      } else {
+        console.log('✅ Weight: Normal (between -2SD and +2SD)');
       }
       
       // Determine height status based on WHO standards
+      console.log('🔍 Height Comparison:', {
+        height,
+        minus3SD: heightData.minus3SD,
+        minus2SD: heightData.minus2SD,
+        median: heightData.median,
+        plus2SD: heightData.plus2SD,
+        plus3SD: heightData.plus3SD
+      });
+      
       if (height < heightData.minus3SD) {
         heightStatus = 'Sangat Pendek';
         heightColor = '#F44336';
+        console.log('✅ Height: Sangat Pendek');
       } else if (height < heightData.minus2SD) {
         heightStatus = 'Pendek';
         heightColor = '#FF9800';
+        console.log('✅ Height: Pendek');
       } else if (height > heightData.plus3SD) {
         heightStatus = 'Tinggi';
         heightColor = '#F44336';
+        console.log('✅ Height: Tinggi');
       } else if (height > heightData.plus2SD) {
         heightStatus = 'Cenderung Tinggi';
         heightColor = '#FF9800';
+        console.log('✅ Height: Cenderung Tinggi');
+      } else {
+        console.log('✅ Height: Normal (between -2SD and +2SD)');
       }
+      
+      console.log('✅ Assessment Result:', {
+        weightStatus,
+        heightStatus,
+        weightRanges: {
+          minus3SD: ageData.minus3SD,
+          minus2SD: ageData.minus2SD,
+          median: ageData.median,
+          plus2SD: ageData.plus2SD,
+          plus3SD: ageData.plus3SD
+        },
+        heightRanges: {
+          minus3SD: heightData.minus3SD,
+          minus2SD: heightData.minus2SD,
+          median: heightData.median,
+          plus2SD: heightData.plus2SD,
+          plus3SD: heightData.plus3SD
+        }
+      });
+    } else {
+      console.log('❌ No WHO standards data found for age:', ageInMonths);
     }
     
     return { 
