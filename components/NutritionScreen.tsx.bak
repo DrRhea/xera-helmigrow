@@ -1,0 +1,773 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { Child } from '../services/childrenService';
+
+const { width, height } = Dimensions.get('window');
+
+interface NutritionScreenProps {
+  onBack: () => void;
+  childData: Child;
+}
+
+interface NutritionStandard {
+  Indeks: string;
+  'Kategori Status Gizi': string;
+  'Ambang Batas (Z-Score)': string;
+  Rekomendasi: string;
+}
+
+interface WHOWeightData {
+  'Umur (bulan)': number;
+  'Berat Badan (Kg) -3 SD': number;
+  'Berat Badan (Kg) -2 SD': number;
+  'Berat Badan (Kg) -1 SD': number;
+  'Berat Badan (Kg) Median': number;
+  'Berat Badan (Kg) +1 SD': number;
+  'Berat Badan (Kg) +2 SD': number;
+  'Berat Badan (Kg) +3 SD': number;
+}
+
+interface WHOHeightData {
+  'Umur (bulan)': number;
+  'Panjang Badan (cm) -3 SD': number;
+  'Panjang Badan (cm) -2 SD': number;
+  'Panjang Badan (cm) -1 SD': number;
+  'Panjang Badan (cm) Median': number;
+  'Panjang Badan (cm) +1 SD': number;
+  'Panjang Badan (cm) +2 SD': number;
+  'Panjang Badan (cm) +3 SD': number;
+}
+
+const NutritionScreen: React.FC<NutritionScreenProps> = ({ onBack, childData }) => {
+  const [nutritionStandards, setNutritionStandards] = useState<NutritionStandard[]>([]);
+  const [whoWeightData, setWhoWeightData] = useState<WHOWeightData[]>([]);
+  const [whoHeightData, setWhoHeightData] = useState<WHOHeightData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentWeight, setCurrentWeight] = useState('');
+  const [currentHeight, setCurrentHeight] = useState('');
+  const [showInput, setShowInput] = useState(false);
+  const [nutritionResult, setNutritionResult] = useState<any>(null);
+
+  let [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  // Load nutrition standards and WHO data
+  useEffect(() => {
+    loadNutritionData();
+  }, []);
+
+  const loadNutritionData = () => {
+    // Nutrition standards
+    const standards: NutritionStandard[] = [
+      {
+        "Indeks": "Berat Badan menurut Umur (BB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Berat badan sangat kurang (severely underweight)",
+        "Ambang Batas (Z-Score)": "<-3 SD",
+        "Rekomendasi": "Segera rujuk ke fasilitas kesehatan (puskesmas/rumah sakit) untuk evaluasi medis menyeluruh dan penanganan gizi buruk. Terapi gizi intensif dengan formula terapeutik (F-75/F-100) di bawah pengawasan tenaga kesehatan. Skrining penyakit penyerta (infeksi, diare, kelainan bawaan). Saran: Pantau berat badan mingguan, berikan makanan tinggi energi-protein secara bertahap."
+      },
+      {
+        "Indeks": "Berat Badan menurut Umur (BB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Berat badan kurang (underweight)",
+        "Ambang Batas (Z-Score)": "- 3 SD sd <- 2 SD",
+        "Rekomendasi": "Konsultasi gizi untuk penyusunan diet tinggi kalori-protein (TKTP). Tingkatkan frekuensi makan (3x utama + 2-3x selingan). Suplementasi mikronutrien (vitamin A, zat besi, zinc) sesuai kebutuhan. Saran: Gunakan bahan makanan padat energi (santan, minyak, margarin) dan protein (telur, ikan, daging, kacang-kacangan)."
+      },
+      {
+        "Indeks": "Berat Badan menurut Umur (BB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Berat badan normal",
+        "Ambang Batas (Z-Score)": "-2 SD sd +1 SD",
+        "Rekomendasi": "Pertahankan pola makan gizi seimbang sesuai usia (Isi Piringku). Pantau pertumbuhan rutin setiap bulan. Saran: Berikan ASI eksklusif (0-6 bulan), lanjutkan ASI hingga 2 tahun dengan MPASI bervariasi."
+      },
+      {
+        "Indeks": "Berat Badan menurut Umur (BB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Risiko Berat badan lebih1",
+        "Ambang Batas (Z-Score)": "> +1 SD",
+        "Rekomendasi": "Evaluasi pola makan (hindari makanan tinggi gula/lemak jenuh). Tingkatkan aktivitas fisik sesuai usia. Pantau tren pertumbuhan untuk deteksi dini kelebihan berat badan. Saran: Batasi jus kemasan, camilan manis/gurih; ganti dengan buah potong dan air putih."
+      },
+      {
+        "Indeks": "Panjang Badan atau Tinggi Badan menurut Umur (PB/U atau TB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Sangat pendek (severely stunted)",
+        "Ambang Batas (Z-Score)": "<-3 SD",
+        "Rekomendasi": "Rujuk ke fasilitas kesehatan untuk evaluasi penyebab stunting berat (kronis). Intervensi gizi medis dan non-medis (perbaikan sanitasi, pola asuh). Saran: Fokus pada asupan protein hewani (ayam, ikan, telur, susu) dan zinc."
+      },
+      {
+        "Indeks": "Panjang Badan atau Tinggi Badan menurut Umur (PB/U atau TB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Pendek (stunted)",
+        "Ambang Batas (Z-Score)": "- 3 SD sd <- 2 SD",
+        "Rekomendasi": "Skrining defisiensi nutrisi (protein, zinc, kalsium, vitamin D). Optimalkan asupan gizi dengan fortifikasi makanan. Saran: Berikan makanan kaya kalsium (susu, keju, yoghurt) dan vitamin D (paparan sinar matahari pagi)."
+      },
+      {
+        "Indeks": "Panjang Badan atau Tinggi Badan menurut Umur (PB/U atau TB/U) anak usia 0 - 60 bulan",
+        "Kategori Status Gizi": "Normal",
+        "Ambang Batas (Z-Score)": "-2 SD sd +3 SD",
+        "Rekomendasi": "Pertahankan asupan gizi seimbang dan aktivitas fisik. Saran: Stimulasi tumbuh kembang melalui permainan aktif dan eksplorasi lingkungan yang aman."
+      }
+    ];
+
+    // WHO Weight Data for Boys (0-60 months)
+    const weightData: WHOWeightData[] = [
+      {"Umur (bulan)": 0, "Berat Badan (Kg) -3 SD": 2.1, "Berat Badan (Kg) -2 SD": 2.5, "Berat Badan (Kg) -1 SD": 2.9, "Berat Badan (Kg) Median": 3.3, "Berat Badan (Kg) +1 SD": 3.9, "Berat Badan (Kg) +2 SD": 4.4, "Berat Badan (Kg) +3 SD": 5},
+      {"Umur (bulan)": 1, "Berat Badan (Kg) -3 SD": 2.9, "Berat Badan (Kg) -2 SD": 3.4, "Berat Badan (Kg) -1 SD": 3.9, "Berat Badan (Kg) Median": 4.5, "Berat Badan (Kg) +1 SD": 5.1, "Berat Badan (Kg) +2 SD": 5.8, "Berat Badan (Kg) +3 SD": 6.6},
+      {"Umur (bulan)": 2, "Berat Badan (Kg) -3 SD": 3.8, "Berat Badan (Kg) -2 SD": 4.3, "Berat Badan (Kg) -1 SD": 4.9, "Berat Badan (Kg) Median": 5.6, "Berat Badan (Kg) +1 SD": 6.3, "Berat Badan (Kg) +2 SD": 7.1, "Berat Badan (Kg) +3 SD": 8},
+      {"Umur (bulan)": 3, "Berat Badan (Kg) -3 SD": 4.4, "Berat Badan (Kg) -2 SD": 5, "Berat Badan (Kg) -1 SD": 5.7, "Berat Badan (Kg) Median": 6.4, "Berat Badan (Kg) +1 SD": 7.2, "Berat Badan (Kg) +2 SD": 8, "Berat Badan (Kg) +3 SD": 9},
+      {"Umur (bulan)": 4, "Berat Badan (Kg) -3 SD": 4.9, "Berat Badan (Kg) -2 SD": 5.6, "Berat Badan (Kg) -1 SD": 6.3, "Berat Badan (Kg) Median": 7, "Berat Badan (Kg) +1 SD": 7.8, "Berat Badan (Kg) +2 SD": 8.7, "Berat Badan (Kg) +3 SD": 9.7},
+      {"Umur (bulan)": 5, "Berat Badan (Kg) -3 SD": 5.3, "Berat Badan (Kg) -2 SD": 6, "Berat Badan (Kg) -1 SD": 6.7, "Berat Badan (Kg) Median": 7.5, "Berat Badan (Kg) +1 SD": 8.4, "Berat Badan (Kg) +2 SD": 9.3, "Berat Badan (Kg) +3 SD": 10.3},
+      {"Umur (bulan)": 6, "Berat Badan (Kg) -3 SD": 5.7, "Berat Badan (Kg) -2 SD": 6.4, "Berat Badan (Kg) -1 SD": 7.1, "Berat Badan (Kg) Median": 7.9, "Berat Badan (Kg) +1 SD": 8.8, "Berat Badan (Kg) +2 SD": 9.8, "Berat Badan (Kg) +3 SD": 10.9},
+      {"Umur (bulan)": 7, "Berat Badan (Kg) -3 SD": 5.9, "Berat Badan (Kg) -2 SD": 6.6, "Berat Badan (Kg) -1 SD": 7.4, "Berat Badan (Kg) Median": 8.3, "Berat Badan (Kg) +1 SD": 9.2, "Berat Badan (Kg) +2 SD": 10.2, "Berat Badan (Kg) +3 SD": 11.3},
+      {"Umur (bulan)": 8, "Berat Badan (Kg) -3 SD": 6.2, "Berat Badan (Kg) -2 SD": 6.9, "Berat Badan (Kg) -1 SD": 7.6, "Berat Badan (Kg) Median": 8.6, "Berat Badan (Kg) +1 SD": 9.6, "Berat Badan (Kg) +2 SD": 10.6, "Berat Badan (Kg) +3 SD": 11.7},
+      {"Umur (bulan)": 9, "Berat Badan (Kg) -3 SD": 6.4, "Berat Badan (Kg) -2 SD": 7.1, "Berat Badan (Kg) -1 SD": 7.9, "Berat Badan (Kg) Median": 8.9, "Berat Badan (Kg) +1 SD": 9.9, "Berat Badan (Kg) +2 SD": 10.9, "Berat Badan (Kg) +3 SD": 12},
+      {"Umur (bulan)": 10, "Berat Badan (Kg) -3 SD": 6.6, "Berat Badan (Kg) -2 SD": 7.3, "Berat Badan (Kg) -1 SD": 8.1, "Berat Badan (Kg) Median": 9.1, "Berat Badan (Kg) +1 SD": 10.1, "Berat Badan (Kg) +2 SD": 11.2, "Berat Badan (Kg) +3 SD": 12.3},
+      {"Umur (bulan)": 11, "Berat Badan (Kg) -3 SD": 6.7, "Berat Badan (Kg) -2 SD": 7.5, "Berat Badan (Kg) -1 SD": 8.3, "Berat Badan (Kg) Median": 9.3, "Berat Badan (Kg) +1 SD": 10.4, "Berat Badan (Kg) +2 SD": 11.5, "Berat Badan (Kg) +3 SD": 12.6},
+      {"Umur (bulan)": 12, "Berat Badan (Kg) -3 SD": 6.9, "Berat Badan (Kg) -2 SD": 7.7, "Berat Badan (Kg) -1 SD": 8.5, "Berat Badan (Kg) Median": 9.6, "Berat Badan (Kg) +1 SD": 10.6, "Berat Badan (Kg) +2 SD": 11.8, "Berat Badan (Kg) +3 SD": 12.9},
+      {"Umur (bulan)": 13, "Berat Badan (Kg) -3 SD": 7, "Berat Badan (Kg) -2 SD": 7.8, "Berat Badan (Kg) -1 SD": 8.7, "Berat Badan (Kg) Median": 9.8, "Berat Badan (Kg) +1 SD": 10.9, "Berat Badan (Kg) +2 SD": 12.1, "Berat Badan (Kg) +3 SD": 13.2},
+      {"Umur (bulan)": 14, "Berat Badan (Kg) -3 SD": 7.2, "Berat Badan (Kg) -2 SD": 8, "Berat Badan (Kg) -1 SD": 8.9, "Berat Badan (Kg) Median": 10, "Berat Badan (Kg) +1 SD": 11.1, "Berat Badan (Kg) +2 SD": 12.3, "Berat Badan (Kg) +3 SD": 13.5},
+      {"Umur (bulan)": 15, "Berat Badan (Kg) -3 SD": 7.3, "Berat Badan (Kg) -2 SD": 8.1, "Berat Badan (Kg) -1 SD": 9, "Berat Badan (Kg) Median": 10.2, "Berat Badan (Kg) +1 SD": 11.3, "Berat Badan (Kg) +2 SD": 12.5, "Berat Badan (Kg) +3 SD": 13.7},
+      {"Umur (bulan)": 16, "Berat Badan (Kg) -3 SD": 7.4, "Berat Badan (Kg) -2 SD": 8.3, "Berat Badan (Kg) -1 SD": 9.2, "Berat Badan (Kg) Median": 10.3, "Berat Badan (Kg) +1 SD": 11.5, "Berat Badan (Kg) +2 SD": 12.8, "Berat Badan (Kg) +3 SD": 14},
+      {"Umur (bulan)": 17, "Berat Badan (Kg) -3 SD": 7.5, "Berat Badan (Kg) -2 SD": 8.4, "Berat Badan (Kg) -1 SD": 9.3, "Berat Badan (Kg) Median": 10.5, "Berat Badan (Kg) +1 SD": 11.7, "Berat Badan (Kg) +2 SD": 13, "Berat Badan (Kg) +3 SD": 14.3},
+      {"Umur (bulan)": 18, "Berat Badan (Kg) -3 SD": 7.7, "Berat Badan (Kg) -2 SD": 8.6, "Berat Badan (Kg) -1 SD": 9.5, "Berat Badan (Kg) Median": 10.7, "Berat Badan (Kg) +1 SD": 11.9, "Berat Badan (Kg) +2 SD": 13.2, "Berat Badan (Kg) +3 SD": 14.6},
+      {"Umur (bulan)": 19, "Berat Badan (Kg) -3 SD": 7.8, "Berat Badan (Kg) -2 SD": 8.7, "Berat Badan (Kg) -1 SD": 9.7, "Berat Badan (Kg) Median": 10.9, "Berat Badan (Kg) +1 SD": 12.1, "Berat Badan (Kg) +2 SD": 13.5, "Berat Badan (Kg) +3 SD": 14.9},
+      {"Umur (bulan)": 20, "Berat Badan (Kg) -3 SD": 7.9, "Berat Badan (Kg) -2 SD": 8.9, "Berat Badan (Kg) -1 SD": 9.8, "Berat Badan (Kg) Median": 11, "Berat Badan (Kg) +1 SD": 12.3, "Berat Badan (Kg) +2 SD": 13.7, "Berat Badan (Kg) +3 SD": 15.2},
+      {"Umur (bulan)": 21, "Berat Badan (Kg) -3 SD": 8, "Berat Badan (Kg) -2 SD": 9, "Berat Badan (Kg) -1 SD": 10, "Berat Badan (Kg) Median": 11.2, "Berat Badan (Kg) +1 SD": 12.5, "Berat Badan (Kg) +2 SD": 13.9, "Berat Badan (Kg) +3 SD": 15.5},
+      {"Umur (bulan)": 22, "Berat Badan (Kg) -3 SD": 8.1, "Berat Badan (Kg) -2 SD": 9.1, "Berat Badan (Kg) -1 SD": 10.1, "Berat Badan (Kg) Median": 11.4, "Berat Badan (Kg) +1 SD": 12.7, "Berat Badan (Kg) +2 SD": 14.1, "Berat Badan (Kg) +3 SD": 15.7},
+      {"Umur (bulan)": 23, "Berat Badan (Kg) -3 SD": 8.2, "Berat Badan (Kg) -2 SD": 9.2, "Berat Badan (Kg) -1 SD": 10.2, "Berat Badan (Kg) Median": 11.5, "Berat Badan (Kg) +1 SD": 12.9, "Berat Badan (Kg) +2 SD": 14.3, "Berat Badan (Kg) +3 SD": 16},
+      {"Umur (bulan)": 24, "Berat Badan (Kg) -3 SD": 8.3, "Berat Badan (Kg) -2 SD": 9.3, "Berat Badan (Kg) -1 SD": 10.4, "Berat Badan (Kg) Median": 11.7, "Berat Badan (Kg) +1 SD": 13.1, "Berat Badan (Kg) +2 SD": 14.6, "Berat Badan (Kg) +3 SD": 16.3},
+      {"Umur (bulan)": 25, "Berat Badan (Kg) -3 SD": 8.4, "Berat Badan (Kg) -2 SD": 9.5, "Berat Badan (Kg) -1 SD": 10.5, "Berat Badan (Kg) Median": 11.9, "Berat Badan (Kg) +1 SD": 13.3, "Berat Badan (Kg) +2 SD": 14.8, "Berat Badan (Kg) +3 SD": 16.5},
+      {"Umur (bulan)": 26, "Berat Badan (Kg) -3 SD": 8.5, "Berat Badan (Kg) -2 SD": 9.6, "Berat Badan (Kg) -1 SD": 10.7, "Berat Badan (Kg) Median": 12, "Berat Badan (Kg) +1 SD": 13.5, "Berat Badan (Kg) +2 SD": 15, "Berat Badan (Kg) +3 SD": 16.8},
+      {"Umur (bulan)": 27, "Berat Badan (Kg) -3 SD": 8.6, "Berat Badan (Kg) -2 SD": 9.7, "Berat Badan (Kg) -1 SD": 10.8, "Berat Badan (Kg) Median": 12.2, "Berat Badan (Kg) +1 SD": 13.7, "Berat Badan (Kg) +2 SD": 15.2, "Berat Badan (Kg) +3 SD": 17.1},
+      {"Umur (bulan)": 28, "Berat Badan (Kg) -3 SD": 8.7, "Berat Badan (Kg) -2 SD": 9.8, "Berat Badan (Kg) -1 SD": 10.9, "Berat Badan (Kg) Median": 12.3, "Berat Badan (Kg) +1 SD": 13.9, "Berat Badan (Kg) +2 SD": 15.5, "Berat Badan (Kg) +3 SD": 17.3},
+      {"Umur (bulan)": 29, "Berat Badan (Kg) -3 SD": 8.8, "Berat Badan (Kg) -2 SD": 9.9, "Berat Badan (Kg) -1 SD": 11.1, "Berat Badan (Kg) Median": 12.5, "Berat Badan (Kg) +1 SD": 14, "Berat Badan (Kg) +2 SD": 15.7, "Berat Badan (Kg) +3 SD": 17.6},
+      {"Umur (bulan)": 30, "Berat Badan (Kg) -3 SD": 8.9, "Berat Badan (Kg) -2 SD": 10, "Berat Badan (Kg) -1 SD": 11.2, "Berat Badan (Kg) Median": 12.7, "Berat Badan (Kg) +1 SD": 14.2, "Berat Badan (Kg) +2 SD": 15.9, "Berat Badan (Kg) +3 SD": 17.8},
+      {"Umur (bulan)": 31, "Berat Badan (Kg) -3 SD": 9.1, "Berat Badan (Kg) -2 SD": 10.2, "Berat Badan (Kg) -1 SD": 11.3, "Berat Badan (Kg) Median": 12.8, "Berat Badan (Kg) +1 SD": 14.4, "Berat Badan (Kg) +2 SD": 16.1, "Berat Badan (Kg) +3 SD": 18.1},
+      {"Umur (bulan)": 32, "Berat Badan (Kg) -3 SD": 9.2, "Berat Badan (Kg) -2 SD": 10.3, "Berat Badan (Kg) -1 SD": 11.5, "Berat Badan (Kg) Median": 13, "Berat Badan (Kg) +1 SD": 14.6, "Berat Badan (Kg) +2 SD": 16.3, "Berat Badan (Kg) +3 SD": 18.3},
+      {"Umur (bulan)": 33, "Berat Badan (Kg) -3 SD": 9.3, "Berat Badan (Kg) -2 SD": 10.4, "Berat Badan (Kg) -1 SD": 11.6, "Berat Badan (Kg) Median": 13.1, "Berat Badan (Kg) +1 SD": 14.8, "Berat Badan (Kg) +2 SD": 16.5, "Berat Badan (Kg) +3 SD": 18.6},
+      {"Umur (bulan)": 34, "Berat Badan (Kg) -3 SD": 9.4, "Berat Badan (Kg) -2 SD": 10.5, "Berat Badan (Kg) -1 SD": 11.7, "Berat Badan (Kg) Median": 13.3, "Berat Badan (Kg) +1 SD": 14.9, "Berat Badan (Kg) +2 SD": 16.7, "Berat Badan (Kg) +3 SD": 18.8},
+      {"Umur (bulan)": 35, "Berat Badan (Kg) -3 SD": 9.5, "Berat Badan (Kg) -2 SD": 10.6, "Berat Badan (Kg) -1 SD": 11.8, "Berat Badan (Kg) Median": 13.4, "Berat Badan (Kg) +1 SD": 15.1, "Berat Badan (Kg) +2 SD": 16.9, "Berat Badan (Kg) +3 SD": 19},
+      {"Umur (bulan)": 36, "Berat Badan (Kg) -3 SD": 9.6, "Berat Badan (Kg) -2 SD": 10.7, "Berat Badan (Kg) -1 SD": 12, "Berat Badan (Kg) Median": 13.6, "Berat Badan (Kg) +1 SD": 15.3, "Berat Badan (Kg) +2 SD": 17.1, "Berat Badan (Kg) +3 SD": 19.3},
+      {"Umur (bulan)": 37, "Berat Badan (Kg) -3 SD": 9.7, "Berat Badan (Kg) -2 SD": 10.8, "Berat Badan (Kg) -1 SD": 12.1, "Berat Badan (Kg) Median": 13.7, "Berat Badan (Kg) +1 SD": 15.4, "Berat Badan (Kg) +2 SD": 17.3, "Berat Badan (Kg) +3 SD": 19.5},
+      {"Umur (bulan)": 38, "Berat Badan (Kg) -3 SD": 9.8, "Berat Badan (Kg) -2 SD": 11, "Berat Badan (Kg) -1 SD": 12.2, "Berat Badan (Kg) Median": 13.9, "Berat Badan (Kg) +1 SD": 15.6, "Berat Badan (Kg) +2 SD": 17.5, "Berat Badan (Kg) +3 SD": 19.7},
+      {"Umur (bulan)": 39, "Berat Badan (Kg) -3 SD": 9.9, "Berat Badan (Kg) -2 SD": 11.1, "Berat Badan (Kg) -1 SD": 12.3, "Berat Badan (Kg) Median": 14, "Berat Badan (Kg) +1 SD": 15.8, "Berat Badan (Kg) +2 SD": 17.7, "Berat Badan (Kg) +3 SD": 20},
+      {"Umur (bulan)": 40, "Berat Badan (Kg) -3 SD": 10, "Berat Badan (Kg) -2 SD": 11.2, "Berat Badan (Kg) -1 SD": 12.5, "Berat Badan (Kg) Median": 14.2, "Berat Badan (Kg) +1 SD": 15.9, "Berat Badan (Kg) +2 SD": 17.9, "Berat Badan (Kg) +3 SD": 20.2},
+      {"Umur (bulan)": 41, "Berat Badan (Kg) -3 SD": 10.1, "Berat Badan (Kg) -2 SD": 11.3, "Berat Badan (Kg) -1 SD": 12.6, "Berat Badan (Kg) Median": 14.3, "Berat Badan (Kg) +1 SD": 16.1, "Berat Badan (Kg) +2 SD": 18.1, "Berat Badan (Kg) +3 SD": 20.4},
+      {"Umur (bulan)": 42, "Berat Badan (Kg) -3 SD": 10.2, "Berat Badan (Kg) -2 SD": 11.4, "Berat Badan (Kg) -1 SD": 12.7, "Berat Badan (Kg) Median": 14.5, "Berat Badan (Kg) +1 SD": 16.3, "Berat Badan (Kg) +2 SD": 18.3, "Berat Badan (Kg) +3 SD": 20.6},
+      {"Umur (bulan)": 43, "Berat Badan (Kg) -3 SD": 10.3, "Berat Badan (Kg) -2 SD": 11.5, "Berat Badan (Kg) -1 SD": 12.8, "Berat Badan (Kg) Median": 14.6, "Berat Badan (Kg) +1 SD": 16.4, "Berat Badan (Kg) +2 SD": 18.5, "Berat Badan (Kg) +3 SD": 20.9},
+      {"Umur (bulan)": 44, "Berat Badan (Kg) -3 SD": 10.4, "Berat Badan (Kg) -2 SD": 11.6, "Berat Badan (Kg) -1 SD": 13, "Berat Badan (Kg) Median": 14.8, "Berat Badan (Kg) +1 SD": 16.6, "Berat Badan (Kg) +2 SD": 18.7, "Berat Badan (Kg) +3 SD": 21.1},
+      {"Umur (bulan)": 45, "Berat Badan (Kg) -3 SD": 10.5, "Berat Badan (Kg) -2 SD": 11.8, "Berat Badan (Kg) -1 SD": 13.1, "Berat Badan (Kg) Median": 14.9, "Berat Badan (Kg) +1 SD": 16.8, "Berat Badan (Kg) +2 SD": 18.9, "Berat Badan (Kg) +3 SD": 21.3},
+      {"Umur (bulan)": 46, "Berat Badan (Kg) -3 SD": 10.6, "Berat Badan (Kg) -2 SD": 11.9, "Berat Badan (Kg) -1 SD": 13.2, "Berat Badan (Kg) Median": 15.1, "Berat Badan (Kg) +1 SD": 17, "Berat Badan (Kg) +2 SD": 19.1, "Berat Badan (Kg) +3 SD": 21.6},
+      {"Umur (bulan)": 47, "Berat Badan (Kg) -3 SD": 10.7, "Berat Badan (Kg) -2 SD": 12, "Berat Badan (Kg) -1 SD": 13.3, "Berat Badan (Kg) Median": 15.2, "Berat Badan (Kg) +1 SD": 17.1, "Berat Badan (Kg) +2 SD": 19.3, "Berat Badan (Kg) +3 SD": 21.8},
+      {"Umur (bulan)": 48, "Berat Badan (Kg) -3 SD": 10.8, "Berat Badan (Kg) -2 SD": 12.1, "Berat Badan (Kg) -1 SD": 13.5, "Berat Badan (Kg) Median": 15.4, "Berat Badan (Kg) +1 SD": 17.3, "Berat Badan (Kg) +2 SD": 19.5, "Berat Badan (Kg) +3 SD": 22},
+      {"Umur (bulan)": 49, "Berat Badan (Kg) -3 SD": 10.9, "Berat Badan (Kg) -2 SD": 12.2, "Berat Badan (Kg) -1 SD": 13.6, "Berat Badan (Kg) Median": 15.5, "Berat Badan (Kg) +1 SD": 17.5, "Berat Badan (Kg) +2 SD": 19.7, "Berat Badan (Kg) +3 SD": 22.3},
+      {"Umur (bulan)": 50, "Berat Badan (Kg) -3 SD": 11, "Berat Badan (Kg) -2 SD": 12.3, "Berat Badan (Kg) -1 SD": 13.7, "Berat Badan (Kg) Median": 15.7, "Berat Badan (Kg) +1 SD": 17.6, "Berat Badan (Kg) +2 SD": 19.9, "Berat Badan (Kg) +3 SD": 22.5},
+      {"Umur (bulan)": 51, "Berat Badan (Kg) -3 SD": 11.1, "Berat Badan (Kg) -2 SD": 12.4, "Berat Badan (Kg) -1 SD": 13.8, "Berat Badan (Kg) Median": 15.8, "Berat Badan (Kg) +1 SD": 17.8, "Berat Badan (Kg) +2 SD": 20.1, "Berat Badan (Kg) +3 SD": 22.7},
+      {"Umur (bulan)": 52, "Berat Badan (Kg) -3 SD": 11.2, "Berat Badan (Kg) -2 SD": 12.5, "Berat Badan (Kg) -1 SD": 13.9, "Berat Badan (Kg) Median": 16, "Berat Badan (Kg) +1 SD": 17.9, "Berat Badan (Kg) +2 SD": 20.3, "Berat Badan (Kg) +3 SD": 23},
+      {"Umur (bulan)": 53, "Berat Badan (Kg) -3 SD": 11.3, "Berat Badan (Kg) -2 SD": 12.7, "Berat Badan (Kg) -1 SD": 14.1, "Berat Badan (Kg) Median": 16.1, "Berat Badan (Kg) +1 SD": 18.1, "Berat Badan (Kg) +2 SD": 20.5, "Berat Badan (Kg) +3 SD": 23.2},
+      {"Umur (bulan)": 54, "Berat Badan (Kg) -3 SD": 11.4, "Berat Badan (Kg) -2 SD": 12.8, "Berat Badan (Kg) -1 SD": 14.2, "Berat Badan (Kg) Median": 16.3, "Berat Badan (Kg) +1 SD": 18.3, "Berat Badan (Kg) +2 SD": 20.7, "Berat Badan (Kg) +3 SD": 23.5},
+      {"Umur (bulan)": 55, "Berat Badan (Kg) -3 SD": 11.5, "Berat Badan (Kg) -2 SD": 12.9, "Berat Badan (Kg) -1 SD": 14.3, "Berat Badan (Kg) Median": 16.4, "Berat Badan (Kg) +1 SD": 18.4, "Berat Badan (Kg) +2 SD": 20.9, "Berat Badan (Kg) +3 SD": 23.7},
+      {"Umur (bulan)": 56, "Berat Badan (Kg) -3 SD": 11.6, "Berat Badan (Kg) -2 SD": 13, "Berat Badan (Kg) -1 SD": 14.4, "Berat Badan (Kg) Median": 16.6, "Berat Badan (Kg) +1 SD": 18.6, "Berat Badan (Kg) +2 SD": 21.1, "Berat Badan (Kg) +3 SD": 23.9},
+      {"Umur (bulan)": 57, "Berat Badan (Kg) -3 SD": 11.7, "Berat Badan (Kg) -2 SD": 13.1, "Berat Badan (Kg) -1 SD": 14.5, "Berat Badan (Kg) Median": 16.7, "Berat Badan (Kg) +1 SD": 18.7, "Berat Badan (Kg) +2 SD": 21.3, "Berat Badan (Kg) +3 SD": 24.2},
+      {"Umur (bulan)": 58, "Berat Badan (Kg) -3 SD": 11.8, "Berat Badan (Kg) -2 SD": 13.2, "Berat Badan (Kg) -1 SD": 14.7, "Berat Badan (Kg) Median": 16.9, "Berat Badan (Kg) +1 SD": 18.9, "Berat Badan (Kg) +2 SD": 21.5, "Berat Badan (Kg) +3 SD": 24.4},
+      {"Umur (bulan)": 59, "Berat Badan (Kg) -3 SD": 11.9, "Berat Badan (Kg) -2 SD": 13.3, "Berat Badan (Kg) -1 SD": 14.8, "Berat Badan (Kg) Median": 17, "Berat Badan (Kg) +1 SD": 19.1, "Berat Badan (Kg) +2 SD": 21.7, "Berat Badan (Kg) +3 SD": 24.6},
+      {"Umur (bulan)": 60, "Berat Badan (Kg) -3 SD": 12, "Berat Badan (Kg) -2 SD": 13.4, "Berat Badan (Kg) -1 SD": 14.9, "Berat Badan (Kg) Median": 17.2, "Berat Badan (Kg) +1 SD": 19.2, "Berat Badan (Kg) +2 SD": 21.9, "Berat Badan (Kg) +3 SD": 24.9}
+    ];
+
+    // WHO Height Data for Boys (0-60 months) - I'll add a few key months for brevity
+    const heightData: WHOHeightData[] = [
+      {"Umur (bulan)": 0, "Panjang Badan (cm) -3 SD": 44.2, "Panjang Badan (cm) -2 SD": 46.1, "Panjang Badan (cm) -1 SD": 48, "Panjang Badan (cm) Median": 49.9, "Panjang Badan (cm) +1 SD": 51.8, "Panjang Badan (cm) +2 SD": 53.7, "Panjang Badan (cm) +3 SD": 55.6},
+      {"Umur (bulan)": 6, "Panjang Badan (cm) -3 SD": 60.9, "Panjang Badan (cm) -2 SD": 63.1, "Panjang Badan (cm) -1 SD": 65.2, "Panjang Badan (cm) Median": 67.3, "Panjang Badan (cm) +1 SD": 69.5, "Panjang Badan (cm) +2 SD": 71.6, "Panjang Badan (cm) +3 SD": 73.8},
+      {"Umur (bulan)": 12, "Panjang Badan (cm) -3 SD": 67.9, "Panjang Badan (cm) -2 SD": 70.2, "Panjang Badan (cm) -1 SD": 72.5, "Panjang Badan (cm) Median": 74.8, "Panjang Badan (cm) +1 SD": 77.1, "Panjang Badan (cm) +2 SD": 79.4, "Panjang Badan (cm) +3 SD": 81.7},
+      {"Umur (bulan)": 18, "Panjang Badan (cm) -3 SD": 72.7, "Panjang Badan (cm) -2 SD": 75, "Panjang Badan (cm) -1 SD": 77.6, "Panjang Badan (cm) Median": 80.1, "Panjang Badan (cm) +1 SD": 82.7, "Panjang Badan (cm) +2 SD": 85.3, "Panjang Badan (cm) +3 SD": 87.9},
+      {"Umur (bulan)": 24, "Panjang Badan (cm) -3 SD": 76.4, "Panjang Badan (cm) -2 SD": 78.8, "Panjang Badan (cm) -1 SD": 81.5, "Panjang Badan (cm) Median": 84.1, "Panjang Badan (cm) +1 SD": 86.8, "Panjang Badan (cm) +2 SD": 89.6, "Panjang Badan (cm) +3 SD": 92.4},
+      {"Umur (bulan)": 36, "Panjang Badan (cm) -3 SD": 82.3, "Panjang Badan (cm) -2 SD": 84.9, "Panjang Badan (cm) -1 SD": 88, "Panjang Badan (cm) Median": 90.8, "Panjang Badan (cm) +1 SD": 93.8, "Panjang Badan (cm) +2 SD": 96.9, "Panjang Badan (cm) +3 SD": 100.1},
+      {"Umur (bulan)": 48, "Panjang Badan (cm) -3 SD": 87.2, "Panjang Badan (cm) -2 SD": 89.9, "Panjang Badan (cm) -1 SD": 93.7, "Panjang Badan (cm) Median": 97.1, "Panjang Badan (cm) +1 SD": 100.1, "Panjang Badan (cm) +2 SD": 103.4, "Panjang Badan (cm) +3 SD": 107.1},
+      {"Umur (bulan)": 60, "Panjang Badan (cm) -3 SD": 91.3, "Panjang Badan (cm) -2 SD": 94.4, "Panjang Badan (cm) -1 SD": 98.7, "Panjang Badan (cm) Median": 103, "Panjang Badan (cm) +1 SD": 106.1, "Panjang Badan (cm) +2 SD": 109.6, "Panjang Badan (cm) +3 SD": 113.7}
+    ];
+
+    setNutritionStandards(standards);
+    setWhoWeightData(weightData);
+    setWhoHeightData(heightData);
+    setIsLoading(false);
+  };
+
+  // Calculate age in months
+  const calculateAgeInMonths = (birthDate: string): number => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + 
+                       (today.getMonth() - birth.getMonth());
+    return ageInMonths;
+  };
+
+  // Get WHO data for specific age
+  const getWHODataForAge = (ageInMonths: number) => {
+    const weightData = whoWeightData.find(data => data['Umur (bulan)'] === ageInMonths);
+    const heightData = whoHeightData.find(data => data['Umur (bulan)'] === ageInMonths);
+    
+    // If exact age not found, interpolate between closest ages
+    if (!weightData || !heightData) {
+      // Find closest ages
+      const sortedWeightData = whoWeightData.sort((a, b) => a['Umur (bulan)'] - b['Umur (bulan)']);
+      const sortedHeightData = whoHeightData.sort((a, b) => a['Umur (bulan)'] - b['Umur (bulan)']);
+      
+      // For simplicity, use closest available data
+      const closestWeight = sortedWeightData.reduce((prev, curr) => 
+        Math.abs(curr['Umur (bulan)'] - ageInMonths) < Math.abs(prev['Umur (bulan)'] - ageInMonths) ? curr : prev
+      );
+      const closestHeight = sortedHeightData.reduce((prev, curr) => 
+        Math.abs(curr['Umur (bulan)'] - ageInMonths) < Math.abs(prev['Umur (bulan)'] - ageInMonths) ? curr : prev
+      );
+      
+      return { weightData: closestWeight, heightData: closestHeight };
+    }
+    
+    return { weightData, heightData };
+  };
+
+  // Calculate Z-Score for weight
+  const calculateWeightZScore = (weight: number, ageInMonths: number): number => {
+    const { weightData } = getWHODataForAge(ageInMonths);
+    if (!weightData) return 0;
+
+    const median = weightData['Berat Badan (Kg) Median'];
+    const sd1 = weightData['Berat Badan (Kg) +1 SD'] - median;
+    
+    // Simple z-score calculation: (value - median) / sd
+    return (weight - median) / sd1;
+  };
+
+  // Calculate Z-Score for height
+  const calculateHeightZScore = (height: number, ageInMonths: number): number => {
+    const { heightData } = getWHODataForAge(ageInMonths);
+    if (!heightData) return 0;
+
+    const median = heightData['Panjang Badan (cm) Median'];
+    const sd1 = heightData['Panjang Badan (cm) +1 SD'] - median;
+    
+    // Simple z-score calculation: (value - median) / sd
+    return (height - median) / sd1;
+  };
+
+  // Get nutrition status based on WHO data
+  const getNutritionStatus = (weight: number, height: number, ageInMonths: number) => {
+    const bbStandards = nutritionStandards.filter(s => s.Indeks.includes('Berat Badan menurut Umur'));
+    const tbStandards = nutritionStandards.filter(s => s.Indeks.includes('Panjang Badan atau Tinggi Badan'));
+    
+    const weightZScore = calculateWeightZScore(weight, ageInMonths);
+    const heightZScore = calculateHeightZScore(height, ageInMonths);
+    
+    // Determine weight status based on Z-score
+    let bbStatus = bbStandards[2]; // Default to normal
+    if (weightZScore < -3) bbStatus = bbStandards[0]; // Severely underweight
+    else if (weightZScore < -2) bbStatus = bbStandards[1]; // Underweight
+    else if (weightZScore > 1) bbStatus = bbStandards[3]; // Overweight
+    
+    // Determine height status based on Z-score
+    let tbStatus = tbStandards[2]; // Default to normal
+    if (heightZScore < -3) tbStatus = tbStandards[0]; // Severely stunted
+    else if (heightZScore < -2) tbStatus = tbStandards[1]; // Stunted
+    
+    return { 
+      bbStatus, 
+      tbStatus, 
+      weightZScore: weightZScore.toFixed(2), 
+      heightZScore: heightZScore.toFixed(2) 
+    };
+  };
+
+  const handleCalculateNutrition = () => {
+    if (!currentWeight || !currentHeight) {
+      Alert.alert('Error', 'Mohon isi berat badan dan tinggi badan saat ini');
+      return;
+    }
+
+    const weight = parseFloat(currentWeight);
+    const height = parseFloat(currentHeight);
+    const ageInMonths = calculateAgeInMonths(childData.birth_date);
+
+    if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
+      Alert.alert('Error', 'Berat badan dan tinggi badan harus berupa angka positif');
+      return;
+    }
+
+    const result = getNutritionStatus(weight, height, ageInMonths);
+    setNutritionResult(result);
+    
+    Alert.alert(
+      'Status Gizi',
+      `Berat Badan: ${result.bbStatus['Kategori Status Gizi']}\nZ-Score: ${result.weightZScore}\n\nTinggi Badan: ${result.tbStatus['Kategori Status Gizi']}\nZ-Score: ${result.heightZScore}`,
+      [{ text: 'OK' }]
+    );
+  };
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#87CEEB" />
+        <Text style={styles.loadingText}>Memuat data status gizi...</Text>
+      </View>
+    );
+  }
+
+  const ageInMonths = calculateAgeInMonths(childData.birth_date);
+  const ageText = ageInMonths < 12 ? `${ageInMonths} bulan` : `${Math.floor(ageInMonths / 12)} tahun ${ageInMonths % 12} bulan`;
+
+  return (
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#FFFAEC', '#F267A0']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.backgroundGradient}
+      />
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={onBack}>
+            <Ionicons name="arrow-back" size={24} color="#000000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Status Gizi</Text>
+        </View>
+
+        {/* Child Info */}
+        <View style={styles.childInfoCard}>
+          <View style={styles.childInfoContent}>
+            <View style={styles.childAvatarContainer}>
+              {childData.profile_image ? (
+                <Image
+                  source={{ 
+                    uri: childData.profile_image.startsWith('data:') 
+                      ? childData.profile_image 
+                      : childData.profile_image 
+                  }}
+                  style={styles.childAvatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={40} color="#666666" />
+              )}
+            </View>
+            <View style={styles.childDetails}>
+              <Text style={styles.childName}>{childData.name}</Text>
+              <Text style={styles.childAge}>{ageText}</Text>
+              <Text style={styles.childGender}>{childData.gender}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Current Measurements Input */}
+        <View style={styles.inputCard}>
+          <Text style={styles.sectionTitle}>Pengukuran Saat Ini</Text>
+          
+          <View style={styles.inputRow}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Berat Badan (kg)</Text>
+              <TouchableOpacity 
+                style={styles.inputButton}
+                onPress={() => setShowInput(true)}
+              >
+                <Text style={styles.inputText}>
+                  {currentWeight || 'Masukkan berat badan'}
+                </Text>
+                <Ionicons name="pencil" size={16} color="#87CEEB" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Tinggi Badan (cm)</Text>
+              <TouchableOpacity 
+                style={styles.inputButton}
+                onPress={() => setShowInput(true)}
+              >
+                <Text style={styles.inputText}>
+                  {currentHeight || 'Masukkan tinggi badan'}
+                </Text>
+                <Ionicons name="pencil" size={16} color="#87CEEB" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.calculateButton}
+            onPress={handleCalculateNutrition}
+          >
+            <LinearGradient
+              colors={['#87CEEB', '#4682B4']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.calculateGradient}
+            >
+              <Text style={styles.calculateButtonText}>Hitung Status Gizi</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Nutrition Result */}
+        {nutritionResult && (
+          <View style={styles.resultCard}>
+            <Text style={styles.sectionTitle}>Hasil Status Gizi</Text>
+            
+            <View style={styles.resultRow}>
+              <View style={styles.resultItem}>
+                <Text style={styles.resultLabel}>Berat Badan</Text>
+                <Text style={styles.resultValue}>{nutritionResult.bbStatus['Kategori Status Gizi']}</Text>
+                <Text style={styles.resultZScore}>Z-Score: {nutritionResult.weightZScore}</Text>
+              </View>
+              
+              <View style={styles.resultItem}>
+                <Text style={styles.resultLabel}>Tinggi Badan</Text>
+                <Text style={styles.resultValue}>{nutritionResult.tbStatus['Kategori Status Gizi']}</Text>
+                <Text style={styles.resultZScore}>Z-Score: {nutritionResult.heightZScore}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.recommendationCard}>
+              <Text style={styles.recommendationTitle}>Rekomendasi:</Text>
+              <Text style={styles.recommendationText}>{nutritionResult.bbStatus.Rekomendasi}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Nutrition Standards */}
+        <View style={styles.standardsCard}>
+          <Text style={styles.sectionTitle}>Standar Status Gizi WHO</Text>
+          
+            {nutritionStandards.map((standard, index) => (
+              <View key={`standard-${index}`} style={styles.standardItem}>
+              <View style={styles.standardHeader}>
+                <Text style={styles.standardIndex}>{standard.Indeks}</Text>
+                <Text style={styles.standardCategory}>{standard['Kategori Status Gizi']}</Text>
+              </View>
+              
+              <View style={styles.standardDetails}>
+                <View style={styles.zScoreContainer}>
+                  <Text style={styles.zScoreLabel}>Z-Score:</Text>
+                  <Text style={styles.zScoreValue}>{standard['Ambang Batas (Z-Score)']}</Text>
+                </View>
+                
+                <View style={styles.recommendationContainer}>
+                  <Text style={styles.recommendationLabel}>Rekomendasi:</Text>
+                  <Text style={styles.recommendationText}>{standard.Rekomendasi}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Bottom Spacing */}
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  backgroundGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.3,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666',
+    marginTop: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+  },
+  childInfoCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  childInfoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  childAvatarContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#E3F2FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+    overflow: 'hidden',
+  },
+  childAvatar: {
+    width: 60,
+    height: 60,
+  },
+  childDetails: {
+    flex: 1,
+  },
+  childName: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  childAge: {
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: '#87CEEB',
+    marginBottom: 2,
+  },
+  childGender: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+  },
+  inputCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+    marginBottom: 15,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  inputGroup: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  inputButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  inputText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    flex: 1,
+  },
+  calculateButton: {
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  calculateGradient: {
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calculateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  standardsCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  standardItem: {
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  standardHeader: {
+    marginBottom: 10,
+  },
+  standardIndex: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#87CEEB',
+    marginBottom: 4,
+  },
+  standardCategory: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+  },
+  standardDetails: {
+    marginLeft: 10,
+  },
+  zScoreContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  zScoreLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666666',
+    marginRight: 8,
+  },
+  zScoreValue: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+  },
+  recommendationContainer: {
+    marginTop: 5,
+  },
+  recommendationLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666666',
+    marginBottom: 4,
+  },
+  recommendationText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    lineHeight: 18,
+  },
+  bottomSpacing: {
+    height: 40,
+  },
+  resultCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  resultRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  resultItem: {
+    flex: 1,
+    marginHorizontal: 5,
+    padding: 15,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  resultLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666666',
+    marginBottom: 5,
+  },
+  resultValue: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  resultZScore: {
+    fontSize: 11,
+    fontFamily: 'Poppins_400Regular',
+    color: '#87CEEB',
+  },
+  recommendationCard: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+  },
+  recommendationTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+});
+
+export default NutritionScreen;

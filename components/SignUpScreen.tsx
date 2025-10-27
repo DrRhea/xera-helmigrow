@@ -9,10 +9,12 @@ import {
   Image,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import authService from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,8 +25,11 @@ interface SignUpScreenProps {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -36,12 +41,39 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
     return null;
   }
 
-  const handleCreateAccount = () => {
-    if (!username || !phoneNumber || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleCreateAccount = async () => {
+    if (!username || !email || !phoneNumber || !password || !confirmPassword) {
+      Alert.alert('Error', 'Mohon isi semua field');
       return;
     }
-    Alert.alert('Success', 'Account created successfully!');
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Password dan konfirmasi password tidak sama');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authService.register({
+        name: username.trim(),
+        email: email.trim(),
+        phone: phoneNumber.trim(),
+        password: password.trim(),
+        password_confirmation: confirmPassword.trim(),
+      });
+      
+      Alert.alert('Success', 'Akun berhasil dibuat!', [
+        {
+          text: 'OK',
+          onPress: onSignIn,
+        },
+      ]);
+    } catch (error: any) {
+      console.error('SignUp Error:', error);
+      Alert.alert('Error', error.message || 'Pendaftaran gagal');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -78,13 +110,27 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
       <View style={styles.inputContainer}>
         {/* Username */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>Nama Lengkap</Text>
           <TextInput
             style={styles.input}
             value={username}
             onChangeText={setUsername}
-            placeholder="Enter your username"
+            placeholder="Masukkan nama lengkap"
             placeholderTextColor="#999"
+          />
+        </View>
+
+        {/* Email */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Masukkan email"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
@@ -95,7 +141,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
             style={styles.input}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
-            placeholder="Enter your phone number"
+            placeholder="Masukkan nomor HP"
             placeholderTextColor="#999"
             keyboardType="phone-pad"
           />
@@ -108,7 +154,20 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
             style={styles.input}
             value={password}
             onChangeText={setPassword}
-            placeholder="Enter your password"
+            placeholder="Masukkan password"
+            placeholderTextColor="#999"
+            secureTextEntry
+          />
+        </View>
+
+        {/* Confirm Password */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Konfirmasi Password</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Konfirmasi password"
             placeholderTextColor="#999"
             secureTextEntry
           />
@@ -124,14 +183,22 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignIn, onBack }) => {
       </View>
 
       {/* Create Account Button */}
-      <TouchableOpacity style={styles.createButton} onPress={handleCreateAccount}>
+      <TouchableOpacity 
+        style={[styles.createButton, isLoading && styles.disabledButton]} 
+        onPress={handleCreateAccount}
+        disabled={isLoading}
+      >
         <LinearGradient
           colors={['#FF6B9D', '#FFB3D1']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.gradientButton}
         >
-          <Text style={styles.createButtonText}>Create account</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.createButtonText}>Create account</Text>
+          )}
         </LinearGradient>
       </TouchableOpacity>
 
@@ -252,6 +319,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontFamily: 'Poppins_600SemiBold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 

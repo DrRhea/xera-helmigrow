@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   Dimensions,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import authService from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,16 +22,19 @@ interface ProfileScreenProps {
   onLogout: () => void;
 }
 
+interface UserData {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onLogout }) => {
-  // Data user (bisa diambil dari state global atau props)
-  const userData = {
-    name: 'Febrinaldo',
-    email: 'febrinaldo@example.com',
-    phone: '+6281234567890',
-    address: 'Jl. Contoh No. 123, Jakarta',
-    joinDate: 'Januari 2024',
-    avatar: require('../assets/icons/ikon-bayi.png'),
-  };
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -38,8 +43,74 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onLogout }) => {
     Poppins_700Bold,
   });
 
+  // Load user data from API
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        console.log('👤 Loading user profile...');
+        const user = await authService.getCurrentUser();
+        console.log('✅ User profile loaded:', user);
+        setUserData(user);
+      } catch (error: any) {
+        console.error('❌ Failed to load user profile:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   if (!fontsLoaded) {
     return null;
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF6B9D" />
+        <Text style={styles.loadingText}>Memuat profil...</Text>
+      </View>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="alert-circle" size={64} color="#FF6B9D" />
+        <Text style={styles.errorText}>Gagal memuat profil</Text>
+        <Text style={styles.errorSubtext}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => {
+          setError(null);
+          setIsLoading(true);
+          // Reload user data
+          authService.getCurrentUser()
+            .then(user => {
+              setUserData(user);
+              setIsLoading(false);
+            })
+            .catch(err => {
+              setError(err.message);
+              setIsLoading(false);
+            });
+        }}>
+          <Text style={styles.retryButtonText}>Coba Lagi</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Show profile if no user data
+  if (!userData) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="person-circle" size={64} color="#FF6B9D" />
+        <Text style={styles.errorText}>Data profil tidak ditemukan</Text>
+      </View>
+    );
   }
 
   const handleEditProfile = () => {
@@ -130,11 +201,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onLogout }) => {
         >
           <View style={styles.profileContent}>
             <View style={styles.avatarContainer}>
-              <Image
-                source={userData.avatar}
-                style={styles.avatar}
-                resizeMode="contain"
-              />
+              <View style={styles.avatarPlaceholder}>
+                <Ionicons name="person" size={40} color="#FFFFFF" />
+              </View>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{userData.name}</Text>
@@ -384,6 +453,62 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
+  },
+  // Loading styles
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_500Medium',
+    color: '#666666',
+    marginTop: 16,
+  },
+  // Error styles
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 40,
+  },
+  errorText: {
+    fontSize: 18,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  errorSubtext: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#FF6B9D',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFFFFF',
+  },
+  // Avatar placeholder
+  avatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

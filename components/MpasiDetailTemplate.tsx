@@ -415,11 +415,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
   },
-  navLabel: {
-    fontSize: 10,
-    fontFamily: 'Poppins_400Regular',
-    color: '#000000',
-  },
 });
 
 export default MpasiDetailTemplate;

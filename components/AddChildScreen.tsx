@@ -10,12 +10,15 @@ import {
   ScrollView,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import childrenService from '../services/childrenService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,13 +30,23 @@ interface AddChildScreenProps {
 const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
   const [fullName, setFullName] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState<'male' | 'female' | null>(null);
+  const [gender, setGender] = useState<'Laki-laki' | 'Perempuan' | null>(null);
   const [birthWeight, setBirthWeight] = useState('');
   const [birthHeight, setBirthHeight] = useState('');
   const [headCircumference, setHeadCircumference] = useState('');
+  const [bloodType, setBloodType] = useState('');
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [medicalHistory, setMedicalHistory] = useState<string[]>([]);
+  const [parentName, setParentName] = useState('');
+  const [parentPhone, setParentPhone] = useState('');
+  const [emergencyContact, setEmergencyContact] = useState('');
+  const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -64,7 +77,18 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setProfileImage(imageUri);
+      
+      // Convert to base64 for database storage
+      try {
+        const base64 = await convertImageToBase64(imageUri);
+        setProfileImageBase64(base64);
+        console.log('📸 Image converted to base64 successfully');
+      } catch (error) {
+        console.error('❌ Failed to convert image to base64:', error);
+        Alert.alert('Error', 'Gagal memproses foto. Silakan coba lagi.');
+      }
     }
   };
 
@@ -85,7 +109,30 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setProfileImage(imageUri);
+      
+      // Convert to base64 for database storage
+      try {
+        const base64 = await convertImageToBase64(imageUri);
+        setProfileImageBase64(base64);
+        console.log('📸 Photo converted to base64 successfully');
+      } catch (error) {
+        console.error('❌ Failed to convert photo to base64:', error);
+        Alert.alert('Error', 'Gagal memproses foto. Silakan coba lagi.');
+      }
+    }
+  };
+
+  const convertImageToBase64 = async (uri: string): Promise<string> => {
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: 'base64' as any,
+      });
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      throw error;
     }
   };
 
@@ -98,7 +145,9 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setSelectedDate(selectedDate);
-      setBirthDate(selectedDate.toLocaleDateString('id-ID'));
+      // Format date as YYYY-MM-DD for Laravel
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      setBirthDate(formattedDate);
     }
   };
 
@@ -150,7 +199,9 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
         if (e.target.value) {
           const date = new Date(e.target.value);
           setSelectedDate(date);
-          setBirthDate(date.toLocaleDateString('id-ID'));
+          // Format date as YYYY-MM-DD for Laravel
+          const formattedDate = date.toISOString().split('T')[0];
+          setBirthDate(formattedDate);
         }
         cleanup();
       };
@@ -174,7 +225,7 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validasi field kosong
     if (!fullName.trim()) {
       Alert.alert('Error', 'Mohon masukkan nama lengkap');
@@ -206,12 +257,12 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
     const height = parseFloat(birthHeight);
     const headCirc = parseFloat(headCircumference);
 
-    if (isNaN(weight) || weight <= 0 || weight > 10) {
-      Alert.alert('Error', 'Berat badan harus antara 0.1 - 10 kg');
+    if (isNaN(weight) || weight <= 0 || weight > 50) {
+      Alert.alert('Error', 'Berat badan harus antara 0.1 - 50 kg');
       return;
     }
-    if (isNaN(height) || height <= 0 || height > 100) {
-      Alert.alert('Error', 'Tinggi badan harus antara 1 - 100 cm');
+    if (isNaN(height) || height <= 0 || height > 200) {
+      Alert.alert('Error', 'Tinggi badan harus antara 1 - 200 cm');
       return;
     }
     if (isNaN(headCirc) || headCirc <= 0 || headCirc > 50) {
@@ -219,8 +270,103 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
       return;
     }
 
-    Alert.alert('Berhasil', 'Data anak berhasil disimpan!');
-    onSave();
+    setIsLoading(true);
+    try {
+      console.log('👶 Creating child data...');
+      
+      const childData = {
+        name: fullName.trim(),
+        birth_date: birthDate,
+        gender: gender,
+        weight: weight,
+        height: height,
+        head_circumference: parseFloat(headCircumference),
+        blood_type: bloodType.trim() || undefined,
+        allergies: allergies.length > 0 ? allergies : [],
+        medical_history: medicalHistory.length > 0 ? medicalHistory : [],
+        parent_name: parentName.trim() || undefined,
+        parent_phone: parentPhone.trim() || undefined,
+        emergency_contact: emergencyContact.trim() || undefined,
+        address: address.trim() || undefined,
+        notes: notes.trim() || undefined,
+        profile_image: profileImageBase64 || undefined,
+      };
+
+      console.log('📤 Sending child data:', JSON.stringify(childData, null, 2));
+      console.log('📤 Data types:', {
+        name: typeof childData.name,
+        birth_date: typeof childData.birth_date,
+        gender: typeof childData.gender,
+        weight: typeof childData.weight,
+        height: typeof childData.height,
+        head_circumference: typeof childData.head_circumference,
+      });
+      console.log('📤 Birth date value:', childData.birth_date);
+      console.log('📤 Birth date length:', childData.birth_date?.length);
+      console.log('📤 Birth date is empty?', !childData.birth_date || childData.birth_date.trim() === '');
+      console.log('📤 All form values:', {
+        fullName,
+        birthDate,
+        gender,
+        weight,
+        height,
+        headCircumference,
+        bloodType,
+        allergies,
+        medicalHistory,
+        parentName,
+        parentPhone,
+        emergencyContact,
+        address,
+        notes,
+      });
+      
+      const newChild = await childrenService.createChild(childData);
+      
+      console.log('✅ Child created successfully:', newChild);
+      console.log('📱 About to show success alert...');
+      
+      // Show success alert
+      Alert.alert(
+        'Berhasil', 
+        'Data anak berhasil disimpan!', 
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('🎉 Alert OK pressed, calling onSave');
+              onSave();
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+      
+      console.log('📱 Success alert should be visible now');
+    } catch (error: any) {
+      console.error('❌ Failed to create child:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        errors: error.response?.data?.errors,
+      });
+      
+      // Show detailed error message
+      let errorMessage = error.message || 'Gagal menyimpan data anak';
+      if (error.response?.data?.errors) {
+        const validationErrors = Object.keys(error.response.data.errors)
+          .map(field => `${field}: ${error.response.data.errors[field].join(', ')}`)
+          .join('\n');
+        errorMessage = `Validation errors:\n${validationErrors}`;
+      }
+      
+      console.log('📱 About to show error alert...');
+      Alert.alert('Error', errorMessage);
+      console.log('📱 Error alert should be visible now');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -279,7 +425,7 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
             <Text style={styles.label}>Tanggal Lahir</Text>
             <TouchableOpacity style={[styles.input, styles.dateInput]} onPress={showDatePickerModal}>
               <Text style={[styles.inputText, !birthDate && styles.placeholderText]}>
-                {birthDate || 'Masukan Tanggal Lahir'}
+                {birthDate ? new Date(birthDate).toLocaleDateString('id-ID') : 'Masukan Tanggal Lahir'}
               </Text>
               <Ionicons name="calendar-outline" size={20} color="#999" />
             </TouchableOpacity>
@@ -291,19 +437,19 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
             <View style={styles.radioGroup}>
               <TouchableOpacity 
                 style={styles.radioOption} 
-                onPress={() => setGender('male')}
+                onPress={() => setGender('Laki-laki')}
               >
-                <View style={[styles.radioButton, gender === 'male' && styles.radioSelected]}>
-                  {gender === 'male' && <View style={styles.radioInner} />}
+                <View style={[styles.radioButton, gender === 'Laki-laki' && styles.radioSelected]}>
+                  {gender === 'Laki-laki' && <View style={styles.radioInner} />}
                 </View>
                 <Text style={styles.radioLabel}>Laki-Laki</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.radioOption} 
-                onPress={() => setGender('female')}
+                onPress={() => setGender('Perempuan')}
               >
-                <View style={[styles.radioButton, gender === 'female' && styles.radioSelected]}>
-                  {gender === 'female' && <View style={styles.radioInner} />}
+                <View style={[styles.radioButton, gender === 'Perempuan' && styles.radioSelected]}>
+                  {gender === 'Perempuan' && <View style={styles.radioInner} />}
                 </View>
                 <Text style={styles.radioLabel}>Perempuan</Text>
               </TouchableOpacity>
@@ -360,14 +506,22 @@ const AddChildScreen: React.FC<AddChildScreenProps> = ({ onBack, onSave }) => {
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <TouchableOpacity 
+          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+          onPress={handleSave}
+          disabled={isLoading}
+        >
           <LinearGradient
             colors={['#87CEEB', '#4682B4']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.saveGradient}
           >
-            <Text style={styles.saveButtonText}>Simpan</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.saveButtonText}>Simpan</Text>
+            )}
           </LinearGradient>
         </TouchableOpacity>
 
@@ -563,6 +717,9 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 40,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 

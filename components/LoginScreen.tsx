@@ -8,9 +8,11 @@ import {
   Dimensions,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import authService from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,6 +25,7 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onBack, onLoginSuccess }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -30,9 +33,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onBack, onLo
     Poppins_700Bold,
   });
 
-  const handleLogin = () => {
-    // Langsung masuk ke halaman Home tanpa validasi
-    onLoginSuccess();
+  const handleLogin = async () => {
+    if (!phoneNumber.trim() || !password.trim()) {
+      Alert.alert('Error', 'Mohon isi nomor HP dan password');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authService.login({
+        phone: phoneNumber.trim(),
+        password: password.trim(),
+      });
+      
+      // Langsung masuk ke HomeScreen tanpa alert
+      console.log('✅ Login successful, calling onLoginSuccess...');
+      onLoginSuccess();
+    } catch (error: any) {
+      console.error('Login Error:', error);
+      Alert.alert('Error', error.message || 'Login gagal');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!fontsLoaded) {
@@ -87,14 +109,22 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onBack, onLo
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
           {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <TouchableOpacity 
+            style={[styles.loginButton, isLoading && styles.disabledButton]} 
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
             <LinearGradient
               colors={['#FF6B9D', '#FFB3D1']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.gradientButton}
             >
-              <Text style={styles.loginButtonText}>Login</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.loginButtonText}>Login</Text>
+              )}
             </LinearGradient>
           </TouchableOpacity>
 
@@ -197,6 +227,9 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 18,
     fontFamily: 'Poppins_600SemiBold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 
