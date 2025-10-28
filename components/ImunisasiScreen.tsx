@@ -12,14 +12,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import BookingImunisasiScreen from './BookingImunisasiScreen';
+import { imunisasiData, calculateAgeInMonths, getVaccineStatus, JadwalImunisasi } from '../data/imunisasiData';
 
 const { width, height } = Dimensions.get('window');
 
 interface ImunisasiScreenProps {
   onBack: () => void;
+  childData?: {
+    id: number;
+    name: string;
+    birth_date: string;
+    gender: string;
+  };
 }
 
-const ImunisasiScreen: React.FC<ImunisasiScreenProps> = ({ onBack }) => {
+const ImunisasiScreen: React.FC<ImunisasiScreenProps> = ({ onBack, childData }) => {
   const [showBooking, setShowBooking] = useState(false);
 
   let [fontsLoaded] = useFonts({
@@ -44,6 +51,43 @@ const ImunisasiScreen: React.FC<ImunisasiScreenProps> = ({ onBack }) => {
   const handleSubmitBooking = () => {
     setShowBooking(false);
     // Here you can add logic to process the booking
+  };
+
+  // Fungsi untuk mendapatkan vaksin yang relevan berdasarkan usia anak
+  const getRelevantVaccines = (): JadwalImunisasi[] => {
+    if (!childData) {
+      // Jika tidak ada data anak, tampilkan beberapa vaksin contoh
+      return imunisasiData.jadwal.slice(0, 5);
+    }
+
+    const ageInMonths = calculateAgeInMonths(childData.birth_date);
+    
+    // Filter vaksin yang relevan berdasarkan usia
+    return imunisasiData.jadwal.filter(vaccine => {
+      const status = getVaccineStatus(vaccine, ageInMonths);
+      return status.status !== 'belum_waktu' && status.status !== 'tidak_diperbolehkan';
+    });
+  };
+
+  // Fungsi untuk mendapatkan rekomendasi tanggal vaksin
+  const getVaccineRecommendation = (vaccine: JadwalImunisasi): string => {
+    if (!childData) {
+      return 'Direkomendasikan sesuai jadwal';
+    }
+
+    const ageInMonths = calculateAgeInMonths(childData.birth_date);
+    const status = getVaccineStatus(vaccine, ageInMonths);
+    
+    switch (status.status) {
+      case 'dianjurkan':
+        return `Direkomendasikan sekarang (${status.description})`;
+      case 'rentang_diperbolehkan':
+        return `Masih bisa diberikan (${status.description})`;
+      case 'imunisasi_kejar':
+        return `Imunisasi kejar (${status.description})`;
+      default:
+        return 'Direkomendasikan sesuai jadwal';
+    }
   };
 
   if (showBooking) {
@@ -111,33 +155,23 @@ const ImunisasiScreen: React.FC<ImunisasiScreenProps> = ({ onBack }) => {
         {/* Jadwal Vaksin Section */}
         <Text style={styles.sectionTitle}>Jadwal Vaksin</Text>
 
-        {/* Dengue 1 Card */}
-        <View style={styles.vaccineCard}>
-          <View style={styles.dottedBorder}>
-            <Text style={styles.vaccineRecommendation}>Direkomendasikan di 19 September 2025</Text>
-            <View style={styles.vaccineDetails}>
-              <Text style={styles.vaccineName}>Dengue 1</Text>
-              <TouchableOpacity style={styles.vaccineStatusButton}>
-                <Text style={styles.vaccineStatusText}>Belum</Text>
-                <Ionicons name="chevron-forward" size={16} color="#000000" />
-              </TouchableOpacity>
+        {/* Dynamic Vaccine Cards */}
+        {getRelevantVaccines().map((vaccine, index) => (
+          <View key={index} style={styles.vaccineCard}>
+            <View style={styles.dottedBorder}>
+              <Text style={styles.vaccineRecommendation}>
+                {getVaccineRecommendation(vaccine)}
+              </Text>
+              <View style={styles.vaccineDetails}>
+                <Text style={styles.vaccineName}>{vaccine.vaksin}</Text>
+                <TouchableOpacity style={styles.vaccineStatusButton}>
+                  <Text style={styles.vaccineStatusText}>Belum</Text>
+                  <Ionicons name="chevron-forward" size={16} color="#000000" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-
-        {/* Dengue 2 Card */}
-        <View style={styles.vaccineCard}>
-          <View style={styles.dottedBorder}>
-            <Text style={styles.vaccineRecommendation}>Direkomendasikan di 19 Maret 2026</Text>
-            <View style={styles.vaccineDetails}>
-              <Text style={styles.vaccineName}>Dengue 2</Text>
-              <TouchableOpacity style={styles.vaccineStatusButton}>
-                <Text style={styles.vaccineStatusText}>Belum</Text>
-                <Ionicons name="chevron-forward" size={16} color="#000000" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        ))}
 
         {/* Panduan Imunisasi Anak Card */}
         <View style={styles.guideCard}>

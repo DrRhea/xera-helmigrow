@@ -49,6 +49,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, onNavigate }) => {
   const [showResepMpasi, setShowResepMpasi] = useState(false);
   const [showChatDoctor, setShowChatDoctor] = useState(false);
   const [showKonten, setShowKonten] = useState(false);
+  const [showArtikel, setShowArtikel] = useState(false);
   const [showChildProfile, setShowChildProfile] = useState(false);
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [showGrowthChart, setShowGrowthChart] = useState(false);
@@ -262,9 +263,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, onNavigate }) => {
   };
 
   const handleArtikel = () => {
-    if (onNavigate) {
-      onNavigate('konten');
-    }
+    setShowArtikel(true);
+  };
+
+  const handleBackFromArtikel = () => {
+    setShowArtikel(false);
   };
 
   const handleProductInfo = () => {
@@ -398,10 +401,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, onNavigate }) => {
     );
   }
 
+  if (showArtikel) {
+    return (
+      <ArtikelScreen 
+        onBack={handleBackFromArtikel}
+        onNavigate={onNavigate}
+      />
+    );
+  }
+
   if (showChildProfile && selectedChild) {
     return (
       <ChildProfileScreen 
         onBack={handleBackFromChildProfile} 
+        onNavigate={onNavigate}
         childData={selectedChild} 
       />
     );
