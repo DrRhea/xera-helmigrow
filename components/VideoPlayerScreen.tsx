@@ -10,21 +10,14 @@ import {
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { VideoContent } from '../data/videoContentData';
 
 const { width, height } = Dimensions.get('window');
 
 interface VideoPlayerScreenProps {
   onBack: () => void;
   onHome: () => void;
-  videoData?: {
-    id: number;
-    title: string;
-    description: string;
-    tag: string;
-    viewCount: string;
-    duration: string;
-    currentTime: string;
-  };
+  videoData?: VideoContent;
 }
 
 const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, videoData }) => {
@@ -44,17 +37,37 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
   }
 
   // Default video data if none provided
-  const defaultVideoData = {
+  const defaultVideoData: VideoContent = {
     id: 1,
-    title: 'Exampel vidio tumbuh kembang anak',
+    title: 'Video Edukasi Tumbuh Kembang Anak',
     description: 'Video edukasi untuk stimulasi tumbuh kembang anak',
-    tag: 'Xampel',
-    viewCount: '254x Ditonton',
+    tag: 'Edukasi',
+    viewCount: 254,
     duration: '5:00',
-    currentTime: '0:48',
+    videoFile: 'stimulasi-bahasa.mp4',
+    category: 'Edukasi',
+    author: 'Tim HelmiGrow',
+    createdAt: '2024-01-15',
+    isPublished: true,
   };
 
   const currentVideo = videoData || defaultVideoData;
+
+  // Helper function untuk mendapatkan source video dari assets
+  const getVideoSource = (videoFile: string) => {
+    // Mapping nama file ke require() untuk assets lokal
+    const videoAssets: { [key: string]: any } = {
+      'cari-mainan.mp4': require('../assets/konten/cari-mainan.mp4'),
+      'ciluk-ba.mp4': require('../assets/konten/ciluk-ba.mp4'),
+      'nyanyian-tidur.mp4': require('../assets/konten/nyanyian-tidur.mp4'),
+      'stimulasi-bahasa.mp4': require('../assets/konten/stimulasi-bahasa.mp4'),
+      'stimulasi-berdiri.mp4': require('../assets/konten/stimulasi-berdiri.mp4'),
+      'tangkap-bola-motorik.mp4': require('../assets/konten/tangkap-bola-motorik.mp4'),
+      'tapuakambaiambai.mp4': require('../assets/konten/tapuakambaiambai.mp4'),
+    };
+    
+    return videoAssets[videoFile] || videoAssets['stimulasi-bahasa.mp4'];
+  };
 
   const handlePlayPause = async () => {
     if (videoRef.current) {
@@ -74,7 +87,7 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
         <Video
           ref={videoRef}
           style={styles.video}
-          source={{ uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }}
+          source={getVideoSource(currentVideo.videoFile)}
           useNativeControls={false}
           resizeMode={ResizeMode.CONTAIN}
           isLooping={false}
@@ -137,7 +150,7 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
         {/* View Count */}
         <View style={styles.viewCountContainer}>
           <Ionicons name="videocam" size={16} color="#FF6B9D" />
-          <Text style={styles.viewCountText}>{currentVideo.viewCount}</Text>
+          <Text style={styles.viewCountText}>{currentVideo.viewCount.toLocaleString()}x Ditonton</Text>
         </View>
       </View>
 

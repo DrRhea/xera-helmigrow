@@ -15,6 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import BottomNavbar from './BottomNavbar';
+import authService, { User } from '../services/authService';
+import { getImageUrl } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,22 +25,8 @@ interface EditProfileScreenProps {
   onNavigate?: (screen: string) => void;
 }
 
-interface UserData {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  profile_image?: string;
-}
-
 const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigate }) => {
-  const [userData, setUserData] = useState<UserData>({
-    id: 0,
-    name: '',
-    email: '',
-    phone: '',
-    profile_image: '',
-  });
+  const [userData, setUserData] = useState<User | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -65,23 +53,16 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
   const loadUserData = async () => {
     try {
       setIsLoading(true);
-      // Simulate API call - replace with actual API call
-      const mockUserData: UserData = {
-        id: 1,
-        name: 'Arya',
-        email: 'arya@gmail.com',
-        phone: '082130012003',
-        profile_image: '',
-      };
-      
-      setUserData(mockUserData);
+      const user = await authService.getCurrentUser();
+      setUserData(user);
       setFormData({
-        name: mockUserData.name,
-        email: mockUserData.email,
-        phone: mockUserData.phone,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
       });
-    } catch (error) {
-      Alert.alert('Error', 'Gagal memuat data profil');
+    } catch (error: any) {
+      console.error('Error loading user data:', error);
+      Alert.alert('Error', error.message || 'Gagal memuat data profil');
     } finally {
       setIsLoading(false);
     }
@@ -94,10 +75,11 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
     }));
     
     // Check if there are changes
-    const hasChanges = 
+    const hasChanges = userData ? (
       formData.name !== userData.name ||
       formData.email !== userData.email ||
-      formData.phone !== userData.phone;
+      formData.phone !== userData.phone
+    ) : false;
     
     setHasChanges(hasChanges);
   };
@@ -136,22 +118,22 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
         return;
       }
       
-      // Simulate API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update user data
-      setUserData(prev => ({
-        ...prev,
+      // Update profile via API
+      const updatedUser = await authService.updateProfile({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-      }));
+      });
+      
+      // Update user data
+      setUserData(updatedUser);
       
       setHasChanges(false);
       Alert.alert('Berhasil', 'Profil berhasil diperbarui');
       
-    } catch (error) {
-      Alert.alert('Error', 'Gagal menyimpan perubahan');
+    } catch (error: any) {
+      console.error('Error saving profile:', error);
+      Alert.alert('Error', error.message || 'Gagal menyimpan perubahan');
     } finally {
       setIsSaving(false);
     }
@@ -165,11 +147,13 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
         [
           { text: 'Tidak', style: 'cancel' },
           { text: 'Ya', onPress: () => {
-            setFormData({
-              name: userData.name,
-              email: userData.email,
-              phone: userData.phone,
-            });
+            if (userData) {
+              setFormData({
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+              });
+            }
             setHasChanges(false);
             onBack();
           }}
@@ -206,6 +190,18 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
     );
   }
 
+  if (!userData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="alert-circle" size={48} color="#FF6B6B" />
+        <Text style={styles.loadingText}>Gagal memuat data profil</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadUserData}>
+          <Text style={styles.retryButtonText}>Coba Lagi</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView 
@@ -235,9 +231,9 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ onBack, onNavigat
         {/* Profile Picture Section */}
         <View style={styles.profilePictureSection}>
           <View style={styles.profilePictureContainer}>
-            {userData.profile_image ? (
+            {userData?.profile_image ? (
               <Image
-                source={{ uri: userData.profile_image }}
+                source={{ uri: getImageUrl(userData.profile_image) || userData.profile_image }}
                 style={styles.profilePicture}
                 resizeMode="cover"
               />
@@ -458,6 +454,18 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 80,
+  },
+  retryButton: {
+    backgroundColor: '#3FB2E6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
   },
 });
 

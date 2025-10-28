@@ -13,6 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import VideoPlayerScreen from './VideoPlayerScreen';
 import BottomNavbar from './BottomNavbar';
+import { videoContentData, VideoContent } from '../data/videoContentData';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,7 +24,7 @@ interface KontenScreenProps {
 
 const KontenScreen: React.FC<KontenScreenProps> = ({ onBack, onNavigate }) => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoContent | null>(null);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -36,7 +37,7 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack, onNavigate }) => {
     return null;
   }
 
-  const handleVideoPress = (video: any) => {
+  const handleVideoPress = (video: VideoContent) => {
     setSelectedVideo(video);
     setShowVideoPlayer(true);
   };
@@ -46,24 +47,20 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack, onNavigate }) => {
     setSelectedVideo(null);
   };
 
-  const contentData = [
-    {
-      id: 1,
-      title: 'Video Edukasi Manjujai',
-      description: 'Video edukasi Manjujai oleh Elfifa Nia',
-      tag: 'Manjujai',
-      viewCount: '254x Ditonton',
-    },
-  ];
+  // Menggunakan data video dari file data
+  const contentData = videoContentData;
 
-  const renderContentCard = ({ item }: { item: any }) => (
+  const renderContentCard = ({ item }: { item: VideoContent }) => (
     <TouchableOpacity 
       style={styles.contentCard}
       onPress={() => handleVideoPress(item)}
     >
       <View style={styles.cardImageContainer}>
-        <View style={styles.videoPlaceholder}>
-          <Ionicons name="play-circle" size={32} color="#FF6B9D" />
+        <View style={styles.videoThumbnail}>
+          <View style={styles.thumbnailOverlay}>
+            <Ionicons name="play-circle" size={32} color="#FF6B9D" />
+          </View>
+          <Text style={styles.durationText}>{item.duration}</Text>
         </View>
       </View>
       <View style={styles.cardContent}>
@@ -76,7 +73,7 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack, onNavigate }) => {
         <Text style={styles.cardDescription}>{item.description}</Text>
         <View style={styles.viewCountContainer}>
           <Ionicons name="videocam" size={16} color="#FF6B9D" />
-          <Text style={styles.viewCountText}>{item.viewCount}</Text>
+          <Text style={styles.viewCountText}>{item.viewCount.toLocaleString()}x Ditonton</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -190,12 +187,37 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginRight: 12,
   },
-  videoPlaceholder: {
+  videoThumbnail: {
     width: '100%',
     height: '100%',
     backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+    borderRadius: 8,
+  },
+  thumbnailOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
+  },
+  durationText: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Poppins_500Medium',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   cardContent: {
     flex: 1,

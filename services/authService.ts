@@ -7,6 +7,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  profile_image?: string;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +28,12 @@ export interface RegisterData {
   phone: string;
   password: string;
   password_confirmation: string;
+}
+
+export interface UpdateProfileData {
+  name: string;
+  email: string;
+  phone: string;
 }
 
 export interface LoginData {
@@ -126,6 +133,31 @@ class AuthService {
       return await AsyncStorage.getItem('authToken');
     } catch (error) {
       return null;
+    }
+  }
+
+  // Update user profile
+  async updateProfile(profileData: UpdateProfileData): Promise<User> {
+    try {
+      const response = await api.put('/user/profile', profileData);
+      return response.data.data;
+    } catch (error: any) {
+      logError('UpdateProfile', error);
+      throw new Error(getErrorMessage(error));
+    }
+  }
+
+  // Update user password
+  async updatePassword(currentPassword: string, newPassword: string, newPasswordConfirmation: string): Promise<void> {
+    try {
+      await api.put('/user/password', {
+        current_password: currentPassword,
+        password: newPassword,
+        password_confirmation: newPasswordConfirmation,
+      });
+    } catch (error: any) {
+      logError('UpdatePassword', error);
+      throw new Error(getErrorMessage(error));
     }
   }
 }

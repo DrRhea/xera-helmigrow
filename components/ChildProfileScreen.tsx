@@ -13,11 +13,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import NutritionScreen from './NutritionScreen';
+import ImunisasiScreen from './ImunisasiScreen';
+import GrowthChartScreen from './GrowthChartScreen';
+import DiariAnakScreen from './DiariAnakScreen';
+import GrowthQuestionnaireScreen from './GrowthQuestionnaireScreen';
 
 const { width, height } = Dimensions.get('window');
 
 interface ChildProfileScreenProps {
   onBack: () => void;
+  onNavigate?: (screen: string) => void;
   childData: {
     id: number;
     name: string;
@@ -38,9 +43,14 @@ interface ChildProfileScreenProps {
   };
 }
 
-const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childData }) => {
+const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, onNavigate, childData }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showNutrition, setShowNutrition] = useState(false);
+  const [showImunisasi, setShowImunisasi] = useState(false);
+  const [showGrowthChart, setShowGrowthChart] = useState(false);
+  const [showDiariAnak, setShowDiariAnak] = useState(false);
+  const [showPerkembangan, setShowPerkembangan] = useState(false);
+  const [showTahapKembang, setShowTahapKembang] = useState(false);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -61,6 +71,51 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
           id: childData.id,
           name: childData.name,
           birth_date: childData.birth_date, // Gunakan birth_date yang benar
+          gender: childData.gender,
+        }}
+      />
+    );
+  }
+
+  if (showImunisasi) {
+    return (
+      <ImunisasiScreen 
+        onBack={() => setShowImunisasi(false)}
+        childData={{
+          id: childData.id,
+          name: childData.name,
+          birth_date: childData.birth_date,
+          gender: childData.gender,
+        }}
+      />
+    );
+  }
+
+  if (showGrowthChart) {
+    return (
+      <GrowthChartScreen 
+        onBack={() => setShowGrowthChart(false)}
+      />
+    );
+  }
+
+  if (showDiariAnak) {
+    return (
+      <DiariAnakScreen 
+        onBack={() => setShowDiariAnak(false)}
+        onNavigate={onNavigate}
+      />
+    );
+  }
+
+  if (showTahapKembang) {
+    return (
+      <GrowthQuestionnaireScreen 
+        onBack={() => setShowTahapKembang(false)}
+        childData={{
+          id: childData.id,
+          name: childData.name,
+          birth_date: childData.birth_date,
           gender: childData.gender,
         }}
       />
@@ -115,7 +170,7 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
       icon: 'calendar',
       color: '#4A90E2',
       onPress: () => {
-        // Navigate to immunization schedule
+        setShowImunisasi(true);
       },
     },
     {
@@ -125,7 +180,7 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
       icon: 'trending-up',
       color: '#FF6B9D',
       onPress: () => {
-        // Navigate to growth chart
+        setShowGrowthChart(true);
       },
     },
     {
@@ -135,7 +190,7 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
       icon: 'book',
       color: '#4CAF50',
       onPress: () => {
-        // Navigate to diary plan
+        setShowDiariAnak(true);
       },
     },
     {
@@ -238,7 +293,12 @@ const ChildProfileScreen: React.FC<ChildProfileScreenProps> = ({ onBack, childDa
               <View style={styles.perkembanganTextContainer}>
                 <Text style={styles.perkembanganTitle}>Perkembangan Anak</Text>
                 <Text style={styles.perkembanganSubtitle}>Stimulasi dan panduan perkembangan berdasarkan usia anak</Text>
-                <TouchableOpacity style={styles.moreInfoButton}>
+                <TouchableOpacity 
+                  style={styles.moreInfoButton}
+                  onPress={() => {
+                    setShowTahapKembang(true);
+                  }}
+                >
                   <Text style={styles.moreInfoText}>Lihat Detail</Text>
                 </TouchableOpacity>
               </View>
