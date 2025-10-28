@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  Platform,
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -22,15 +23,12 @@ interface VideoPlayerScreenProps {
     description: string;
     tag: string;
     viewCount: string;
-    duration: string;
-    videoSource: any;
-    thumbnail: any;
+    videoSource?: any;
   };
 }
 
 const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, videoData }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [videoStatus, setVideoStatus] = useState<any>({});
   const videoRef = useRef<Video>(null);
 
   let [fontsLoaded] = useFonts({
@@ -47,83 +45,91 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
   // Default video data if none provided
   const defaultVideoData = {
     id: 1,
-    title: 'Video Edukasi Manjujai',
-    description: 'Video edukasi untuk stimulasi tumbuh kembang anak',
+    title: 'Tapuak ambai-ambai',
+    description: 'untuk menstimulasi aspek bahasa (anak belajar kata-kata baru dari nyanyian), sosial emosial (meningkatkan ikatan orang tua dan ekspresi emosi anak)',
     tag: 'Manjujai',
     viewCount: '254x Ditonton',
-    duration: '5:00',
-    videoSource: require('../assets/konten-manjujai/cari-mainan.mp4'),
-    thumbnail: require('../assets/icons/manjujai.png'),
+    videoSource: require('../assets/konten-manjujai/tapuakambaiambai.mp4'),
   };
 
   const currentVideo = videoData || defaultVideoData;
 
+  // Use the video source from currentVideo
+  const videoSource = currentVideo.videoSource;
+
   const handlePlayPause = async () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        await videoRef.current.pauseAsync();
+    try {
+      if (Platform.OS === 'web') {
+        // For web platform, just toggle the state and let shouldPlay handle it
+        setIsPlaying(!isPlaying);
       } else {
-        await videoRef.current.playAsync();
+        // For mobile platforms, use the ref methods
+        if (videoRef.current) {
+          if (isPlaying) {
+            await videoRef.current.pauseAsync();
+          } else {
+            await videoRef.current.playAsync();
+          }
+          setIsPlaying(!isPlaying);
+        }
       }
-      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.log('Error playing video:', error);
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={20} color="#000000" />
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Video Player</Text>
+      </View>
+
       {/* Video Player Section */}
-      <View style={styles.videoPlayerContainer}>
+      <View style={styles.videoContainer}>
         <Video
           ref={videoRef}
           style={styles.video}
-          source={currentVideo.videoSource}
-          useNativeControls={false}
+          source={videoSource}
+          useNativeControls={Platform.OS === 'web'}
           resizeMode={ResizeMode.CONTAIN}
           isLooping={false}
-          onPlaybackStatusUpdate={setVideoStatus}
+          shouldPlay={Platform.OS === 'web' ? false : isPlaying}
+          onLoadStart={() => {
+            console.log('Video loading started');
+          }}
+          onLoad={() => {
+            console.log('Video loaded successfully');
+          }}
+          onError={(error) => {
+            console.log('Video error:', error);
+          }}
+          onPlaybackStatusUpdate={(status) => {
+            console.log('Playback status:', status);
+          }}
         />
         
-        {/* Play/Pause Overlay */}
-        <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
-          <View style={styles.playButtonCircle}>
-            <Ionicons 
-              name={isPlaying ? "pause" : "play"} 
-              size={24} 
-              color="#FFFFFF" 
-            />
-          </View>
-        </TouchableOpacity>
-
-        {/* Progress Bar */}
-        <View style={styles.progressBarContainer}>
-          <View style={styles.progressBar}>
-            <View style={[
-              styles.progressBarFilled, 
-              { width: videoStatus.durationMillis ? 
-                `${(videoStatus.positionMillis / videoStatus.durationMillis) * 100}%` : '0%' 
-              }
-            ]} />
-            <View style={[
-              styles.progressBarScrubber,
-              { left: videoStatus.durationMillis ? 
-                `${(videoStatus.positionMillis / videoStatus.durationMillis) * 100}%` : '0%' 
-              }
-            ]} />
-          </View>
-        </View>
-
-        {/* Time Display */}
-        <View style={styles.timeDisplay}>
-          <Text style={styles.timeText}>
-            {videoStatus.positionMillis ? 
-              `${Math.floor(videoStatus.positionMillis / 1000 / 60)}:${Math.floor((videoStatus.positionMillis / 1000) % 60).toString().padStart(2, '0')}` : 
-              '0:00'
-            } / {videoStatus.durationMillis ? 
-              `${Math.floor(videoStatus.durationMillis / 1000 / 60)}:${Math.floor((videoStatus.durationMillis / 1000) % 60).toString().padStart(2, '0')}` : 
-              currentVideo.duration
-            }
-          </Text>
-        </View>
+        {/* Custom Play Button - Only show on mobile */}
+        {Platform.OS !== 'web' && (
+          <TouchableOpacity 
+            style={styles.playButton} 
+            onPress={handlePlayPause}
+          >
+            <View style={styles.playButtonCircle}>
+              <Ionicons 
+                name={isPlaying ? "pause" : "play"} 
+                size={24} 
+                color="#FFFFFF" 
+              />
+            </View>
+          </TouchableOpacity>
+        )}
+        
       </View>
 
       {/* Video Information Section */}
@@ -135,6 +141,9 @@ const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({ onBack, onHome, v
 
         {/* Video Title */}
         <Text style={styles.videoTitle}>{currentVideo.title}</Text>
+
+        {/* Video Description */}
+        <Text style={styles.videoDescription}>{currentVideo.description}</Text>
 
         {/* View Count */}
         <View style={styles.viewCountContainer}>
@@ -208,10 +217,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  videoPlayerContainer: {
-    height: height * 0.4, // 40% of screen height
-    backgroundColor: '#2C5F5F', // Dark teal background
-    position: 'relative',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  backButtonCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+  },
+  videoContainer: {
+    height: height * 0.4,
+    backgroundColor: '#000000',
+    marginHorizontal: 20,
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   video: {
     width: '100%',
@@ -232,45 +277,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
-  },
-  progressBarContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    position: 'relative',
-  },
-  progressBarFilled: {
-    height: 4,
-    width: '30%', // 30% of video watched
-    backgroundColor: '#FF6B9D',
-    borderRadius: 2,
-  },
-  progressBarScrubber: {
-    position: 'absolute',
-    top: -6,
-    left: '30%',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#FF6B9D',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  timeDisplay: {
-    position: 'absolute',
-    bottom: 35,
-    left: 20,
-  },
-  timeText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Poppins_500Medium',
   },
   videoInfoContainer: {
     flex: 1,
@@ -297,6 +303,13 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 12,
     lineHeight: 24,
+  },
+  videoDescription: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+    marginBottom: 16,
+    lineHeight: 20,
   },
   viewCountContainer: {
     flexDirection: 'row',

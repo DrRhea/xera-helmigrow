@@ -23,6 +23,35 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
+  // Helper function to get video source
+  const getVideoSource = (videoName: string) => {
+    // Use local video files from assets (now in .mp4 format)
+    try {
+      switch(videoName) {
+        case 'tapuakambaiambai':
+          return require('../assets/konten-manjujai/tapuakambaiambai.mp4');
+        case 'cari-mainan':
+          return require('../assets/konten-manjujai/cari-mainan.mp4');
+        case 'stimulasi-berdiri':
+          return require('../assets/konten-manjujai/stimulasi-berdiri.mp4');
+        case 'stimulasi-bahasa':
+          return require('../assets/konten-manjujai/stimulasi-bahasa.mp4');
+        case 'ciluk-ba':
+          return require('../assets/konten-manjujai/ciluk-ba.mp4');
+        case 'tangkap-bola-motorik':
+          return require('../assets/konten-manjujai/tangkap-bola-motorik.mp4');
+        case 'nyanyian-tidur':
+          return require('../assets/konten-manjujai/nyanyian-tidur.mp4');
+        default:
+          return require('../assets/konten-manjujai/tapuakambaiambai.mp4');
+      }
+    } catch (error) {
+      console.log('Error loading local video:', error);
+      // Fallback to first video
+      return require('../assets/konten-manjujai/tapuakambaiambai.mp4');
+    }
+  };
+
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -47,73 +76,59 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
   const contentData = [
     {
       id: 1,
-      title: 'Cari Mainan',
-      description: 'Video edukasi untuk stimulasi motorik halus dan koordinasi mata-tangan',
-      tag: 'Motorik Halus',
-      viewCount: '1.2k Ditonton',
-      duration: '3:45',
-      videoSource: require('../assets/konten-manjujai/cari-mainan.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Tapuak ambai-ambai',
+      description: 'untuk menstimulasi aspek bahasa (anak belajar kata-kata baru dari nyanyian), sosial emosial (meningkatkan ikatan orang tua dan ekspresi emosi anak)',
+      tag: 'Manjujai',
+      viewCount: '254x Ditonton',
+      videoSource: getVideoSource('tapuakambaiambai'),
     },
     {
       id: 2,
-      title: 'Ciluk Ba',
-      description: 'Permainan tradisional untuk stimulasi sosial dan emosional anak',
-      tag: 'Sosial Emosional',
-      viewCount: '856 Ditonton',
-      duration: '2:30',
-      videoSource: require('../assets/konten-manjujai/ciluk-ba.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Mencari mainan',
+      description: 'untuk menstimulasi aspek kognitif (melatih fokus dan pemecahan masalah pada anak), motorik halus (melatih koordinasi tangan dan mata saat mengambil mainan)',
+      tag: 'Manjujai',
+      viewCount: '189x Ditonton',
+      videoSource: getVideoSource('cari-mainan'),
     },
     {
       id: 3,
-      title: 'Nyanyian Tidur',
-      description: 'Lagu pengantar tidur untuk menenangkan dan membantu anak tidur',
-      tag: 'Pengasuhan',
-      viewCount: '2.1k Ditonton',
-      duration: '4:15',
-      videoSource: require('../assets/konten-manjujai/nyanyian-tidur.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Ayo berdiri',
+      description: 'untuk menstimulasi aspek motorik kasar (meningkatkan kekuatan kaki dan keseimbangan), sosial emosional (meningkatkan rasa percaya diri saat berhasil berdiri)',
+      tag: 'Manjujai',
+      viewCount: '312x Ditonton',
+      videoSource: getVideoSource('stimulasi-berdiri'),
     },
     {
       id: 4,
-      title: 'Stimulasi Bahasa',
-      description: 'Teknik untuk mengembangkan kemampuan bahasa dan komunikasi anak',
-      tag: 'Bahasa',
-      viewCount: '1.8k Ditonton',
-      duration: '5:20',
-      videoSource: require('../assets/konten-manjujai/stimulasi-bahasa.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Buku pertamaku',
+      description: 'untuk menstimulasi aspek bahasa (meningkatkan kosa kata anak), kognitif (meningkatkan pemahaman terhadap objek gambar)',
+      tag: 'Manjujai',
+      viewCount: '145x Ditonton',
+      videoSource: getVideoSource('stimulasi-bahasa'),
     },
     {
       id: 5,
-      title: 'Stimulasi Berdiri',
-      description: 'Latihan untuk membantu anak belajar berdiri dan berjalan',
-      tag: 'Motorik Kasar',
-      viewCount: '1.5k Ditonton',
-      duration: '3:55',
-      videoSource: require('../assets/konten-manjujai/stimulasi-berdiri.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Ciluk ba',
+      description: 'untuk menstimulasi aspek sosial emosional (mengajarkan konsep keterikatan dan interaksi sosial), kognitif (memahami konsep hilang-muncul)',
+      tag: 'Manjujai',
+      viewCount: '278x Ditonton',
+      videoSource: getVideoSource('ciluk-ba'),
     },
     {
       id: 6,
-      title: 'Tangkap Bola Motorik',
-      description: 'Permainan untuk melatih koordinasi dan refleks anak',
-      tag: 'Motorik Kasar',
-      viewCount: '1.3k Ditonton',
-      duration: '4:10',
-      videoSource: require('../assets/konten-manjujai/tangkap-bola-motorik.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Ayo tangkap bola',
+      description: 'untuk menstimulasi motorik kasar (melatih refleks dan keseimbangan anak), kognitif (meningkatkan fokus serta koordinasi mata dan tangan)',
+      tag: 'Manjujai',
+      viewCount: '201x Ditonton',
+      videoSource: getVideoSource('tangkap-bola-motorik'),
     },
     {
       id: 7,
-      title: 'Tapuakambaiambai',
-      description: 'Permainan tradisional Minangkabau untuk stimulasi ritme dan koordinasi',
-      tag: 'Budaya',
-      viewCount: '967 Ditonton',
-      duration: '3:25',
-      videoSource: require('../assets/konten-manjujai/tapuakambaiambai.mp4'),
-      thumbnail: require('../assets/icons/manjujai.png'),
+      title: 'Nyanyian sebelum tidur',
+      description: 'menstimulasi growt hormon (hormon pertumbuhan) dan menurunkan hormon kortisol (stres pada anak) sehingga dapat meningkatkan status gizi anak.',
+      tag: 'Manjujai',
+      viewCount: '423x Ditonton',
+      videoSource: getVideoSource('nyanyian-tidur'),
     },
   ];
 
@@ -123,12 +138,8 @@ const KontenScreen: React.FC<KontenScreenProps> = ({ onBack }) => {
       onPress={() => handleVideoPress(item)}
     >
       <View style={styles.cardImageContainer}>
-        <Image source={item.thumbnail} style={styles.videoThumbnail} />
-        <View style={styles.playOverlay}>
+        <View style={styles.videoPlaceholder}>
           <Ionicons name="play-circle" size={32} color="#FF6B9D" />
-        </View>
-        <View style={styles.durationBadge}>
-          <Text style={styles.durationText}>{item.duration}</Text>
         </View>
       </View>
       <View style={styles.cardContent}>
@@ -308,36 +319,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     marginRight: 12,
-    position: 'relative',
   },
-  videoThumbnail: {
+  videoPlaceholder: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
-  },
-  playOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  durationBadge: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  durationText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontFamily: 'Poppins_500Medium',
   },
   cardContent: {
     flex: 1,
