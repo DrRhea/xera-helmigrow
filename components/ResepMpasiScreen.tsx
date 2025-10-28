@@ -1,0 +1,392 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Image,
+  FlatList,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import MpasiDetailScreen from './MpasiDetailScreen';
+import MpasiDetailScreen0911 from './MpasiDetailScreen09-11';
+import MpasiDetailScreen1223 from './MpasiDetailScreen12-23';
+import MpasiDetailScreen25 from './MpasiDetailScreen2-5';
+import MpasiDetailScreenIbuHamil from './MpasiDetailScreenIbuHamil';
+import ChatDoctorScreen from './ChatDoctorScreen';
+import KontenScreen from './KontenScreen';
+
+const { width, height } = Dimensions.get('window');
+
+interface ResepMpasiScreenProps {
+  onBack: () => void;
+}
+
+const ResepMpasiScreen: React.FC<ResepMpasiScreenProps> = ({ onBack }) => {
+  const [showMpasiDetail, setShowMpasiDetail] = useState(false);
+  const [selectedMpasiId, setSelectedMpasiId] = useState<number | null>(null);
+  const [showChatDoctor, setShowChatDoctor] = useState(false);
+  const [showKonten, setShowKonten] = useState(false);
+
+  let [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  const handleMpasiDetail = (id: number) => {
+    setSelectedMpasiId(id);
+    setShowMpasiDetail(true);
+  };
+
+  const handleBackFromMpasiDetail = () => {
+    setShowMpasiDetail(false);
+    setSelectedMpasiId(null);
+  };
+
+  const handleChatDoctor = () => {
+    setShowChatDoctor(true);
+  };
+
+  const handleBackFromChatDoctor = () => {
+    setShowChatDoctor(false);
+  };
+
+  const handleKonten = () => {
+    setShowKonten(true);
+  };
+
+  const handleBackFromKonten = () => {
+    setShowKonten(false);
+  };
+
+  const bottomNavItems = [
+    { id: 1, iconImage: require('../assets/icon navigasi/icon-home.png'), label: 'Home', active: false },
+    { id: 2, iconImage: require('../assets/icon navigasi/icon-konten.png'), label: 'Konten', active: true },
+    { id: 3, iconImage: require('../assets/icon navigasi/icon-chat-dokter.png'), label: 'Chat Dokter', active: false },
+    { id: 4, iconImage: require('../assets/icon navigasi/icon-transaksi.png'), label: 'Transaksi', active: false },
+    { id: 5, iconImage: require('../assets/icon navigasi/icon-profil.png'), label: 'Profil', active: false },
+  ];
+
+  const recipeData = [
+    {
+      id: 1,
+      title: 'Kebutuhan MP-ASI',
+      subtitle: 'Usia 06-08 Bulan',
+      image: require('../assets/mpasi/profil-mpasi-06-08-bulan.png'),
+      badge: 'LANJUTKAN PEMBERIAN ASI 70% MP-ASI 30%',
+      rating: 5,
+    },
+    {
+      id: 2,
+      title: 'Kebutuhan MP-ASI',
+      subtitle: 'Usia 09-11 Bulan',
+      image: require('../assets/mpasi/profil-mpasi-09-11-bulan.png'),
+      badge: 'LANJUTKAN PEMBERIAN ASI 50% MP-ASI 50%',
+      rating: 5,
+    },
+    {
+      id: 3,
+      title: 'Kebutuhan MP-ASI',
+      subtitle: 'Usia 12-23 Bulan',
+      image: require('../assets/mpasi/profil-mpasi-12-23-bulan.png'),
+      badge: 'LANJUTKAN PEMBERIAN ASI 70%',
+      rating: 5,
+    },
+    {
+      id: 4,
+      title: 'Kebutuhan MP-ASI',
+      subtitle: 'Usia 02-05 Tahun',
+      image: require('../assets/mpasi/profil-mpasi-2-5-tahun.png'),
+      badge: 'LANJUTKAN PEMBERIAN ASI 30%',
+      rating: 5,
+    },
+    {
+      id: 5,
+      title: 'Kebutuhan Gizi',
+      subtitle: 'Ibu Hamil',
+      image: require('../assets/mpasi/profil-mpasi-ibuhamil.png'),
+      badge: 'NUTRISI LENGKAP UNTUK IBU HAMIL',
+      rating: 5,
+    },
+  ];
+
+  const renderRecipeCard = ({ item }: { item: any }) => (
+    <TouchableOpacity 
+      style={styles.recipeCard}
+      onPress={() => handleMpasiDetail(item.id)}
+    >
+      <View style={styles.cardImageContainer}>
+        <Image
+          source={item.image}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>{item.badge}</Text>
+        </View>
+      </View>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{item.title}</Text>
+        <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+        <View style={styles.ratingContainer}>
+          {[...Array(5)].map((_, index) => (
+            <Ionicons
+              key={index}
+              name="star-outline"
+              size={10}
+              color="#FFD700"
+              style={styles.star}
+            />
+          ))}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (showKonten) {
+    return <KontenScreen onBack={handleBackFromKonten} />;
+  }
+
+  if (showChatDoctor) {
+    return <ChatDoctorScreen onBack={handleBackFromChatDoctor} />;
+  }
+
+  if (showMpasiDetail) {
+    switch (selectedMpasiId) {
+      case 1:
+        return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+      case 2:
+        return <MpasiDetailScreen0911 onBack={handleBackFromMpasiDetail} />;
+      case 3:
+        return <MpasiDetailScreen1223 onBack={handleBackFromMpasiDetail} />;
+      case 4:
+        return <MpasiDetailScreen25 onBack={handleBackFromMpasiDetail} />;
+      case 5:
+        return <MpasiDetailScreenIbuHamil onBack={handleBackFromMpasiDetail} />;
+      default:
+        return <MpasiDetailScreen onBack={handleBackFromMpasiDetail} />;
+    }
+  }
+
+  return (
+    <View style={styles.fullScreenContainer}>
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Image
+            source={require('../assets/icons/back-icon.png')}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Resep Mpasi</Text>
+      </View>
+
+      {/* Recipe Grid */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <FlatList
+          data={recipeData}
+          renderItem={renderRecipeCard}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          scrollEnabled={false}
+          contentContainerStyle={styles.gridContainer}
+        />
+        
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNavigation}>
+        {bottomNavItems.map((item) => (
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.navItem}
+            onPress={() => {
+              if (item.id === 1) { // Home
+                onBack(); // Go back to home screen
+              } else if (item.id === 2) { // Konten
+                handleKonten();
+              } else if (item.id === 3) { // Chat Dokter
+                handleChatDoctor();
+              }
+            }}
+          >
+            <View style={styles.navIcon}>
+              <Image
+                source={item.iconImage}
+                style={item.id === 3 ? styles.chatDoctorIcon : styles.navIconImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.navLabel}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#000000',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 60,
+  },
+  gridContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 5,
+  },
+  row: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  recipeCard: {
+    width: (width - 60) / 2,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  cardImageContainer: {
+    position: 'relative',
+    height: 100,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    right: 6,
+    backgroundColor: 'rgba(76, 175, 80, 0.9)',
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    fontSize: 7,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 9,
+  },
+  cardContent: {
+    padding: 10,
+  },
+  cardTitle: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#000000',
+    marginBottom: 3,
+  },
+  cardSubtitle: {
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666666',
+    marginBottom: 4,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  star: {
+    marginRight: 1,
+    fontSize: 10,
+  },
+  bottomSpacing: {
+    height: 20,
+  },
+  bottomNavigation: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: '#FFF5F5',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  navIcon: {
+    marginBottom: 4,
+  },
+  navIconImage: {
+    width: 32,
+    height: 32,
+  },
+  chatDoctorIcon: {
+    width: 40,
+    height: 40,
+  },
+  navLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
+    color: '#000000',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+});
+
+export default ResepMpasiScreen;
